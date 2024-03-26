@@ -1,38 +1,44 @@
+#pragma once
+#include <glm/glm.hpp>
+#include <glad/glad.h>
+#include "shader_s.h"
+#include <vector>
+
+struct massData
+{
+    glm::mat3x3 inertia;
+    glm::vec3 center;
+    float mass;
+};
+
+
 class Cube {
+    glm::vec3 rotation;
+    glm::vec3 color;
+
+
 public:
-    Cube() {
-        float vertices[] = {
-            // positions          // texture coords
-            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-             0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-            // ... (rest of the cube vertices)
-        };
+    Cube();
+    void Draw(Shader& shader);
+    void SetPosition(glm::vec3 newPosition);
+    void SetVelocity(glm::vec3 newVelocity);
+    void SetRotation(const glm::vec3& rotationIn);
+    void SetColor(const glm::vec3& colorIn);
 
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
+    glm::vec3 GetPosition();
+    glm::vec3 GetVelocity();
+    std::vector<glm::vec3> GetVertices() const; // Add this method
+    std::vector<glm::vec3> GetEdges() const;
+    std::vector<glm::vec3> GetFaceNormals() const;
 
-        glBindVertexArray(VAO);
+    void deleteBuffers();
 
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-        // position attribute
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
-        // texture coord attribute
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-        glEnableVertexAttribArray(1);
-    }
-
-    void Draw(Shader &shader) {
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-    }
+    void SetMassData(massData newMassData);
+    massData GetMassData();
 
 private:
     unsigned int VAO, VBO;
+    glm::vec3 position;
+    glm::vec3 velocity;
+    massData m_data;
 };
