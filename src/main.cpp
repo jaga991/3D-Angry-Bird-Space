@@ -35,8 +35,6 @@ bool firstMouse = true;
 bool wasRightMouseButtonPressed = false;
 
 
-const glm::vec3 gravity(0.0f, 0.3f, 0.0f);
-
 float floorVertices[] = {
     // positions          // texture Coords 
      5.0f, -0.5f,  5.0f,  2.0f, 0.0f,

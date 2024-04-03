@@ -3,7 +3,7 @@
 #include <vector>
 
 
-Cube::Cube() : position(0.0f, 0.0f, 0.0f), velocity(0.0f, 0.0f, 0.0f), color(0.0f, 1.0f, 0.0f), m_data{glm::mat3(1.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f} {
+Cube::Cube() : position(0.0f, 0.0f, 0.0f), velocity(0.0f, 0.0f, 0.0f), color(0.0f, 1.0f, 0.0f), mass(1.0f){
     float vertices[] = {
            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
             0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -48,10 +48,8 @@ Cube::Cube() : position(0.0f, 0.0f, 0.0f), velocity(0.0f, 0.0f, 0.0f), color(0.0
            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
 
-    glm::vec3 velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+    inertia = glm::mat3x3(1.0f);
 
-
-    massData m_data;
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -166,6 +164,17 @@ void Cube::SetRotation(const glm::vec3& rotationIn) {
 void Cube::SetColor(const glm::vec3& colorIn) {
     this->color = colorIn;
 }
+void Cube::SetMass(float massIn)
+{
+    this->mass = massIn;
+}
+
+void Cube::SetInertia(const glm::mat3x3& inertiaIn)
+{
+    this->inertia = inertiaIn;
+}
+
+
 
 glm::vec3 Cube::GetPosition() {
     return position;
@@ -175,19 +184,19 @@ glm::vec3 Cube::GetVelocity() {
     return velocity;
 }
 
+float Cube::GetMass()
+{
+		return mass;
+}
+
+glm::mat3x3 Cube::GetInertia()
+{
+    return inertia;
+}
+
 void Cube::deleteBuffers() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
 }
 
-void Cube::SetMassData(massData newMassData)
-{
-		m_data = newMassData;
-}
-
-
-massData Cube::GetMassData()
-{
-		return m_data;
-}
 

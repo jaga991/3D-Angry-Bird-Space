@@ -4,17 +4,9 @@
 #include "shader_s.h"
 #include <vector>
 
-struct massData
-{
-    glm::mat3x3 inertia;
-    glm::vec3 center;
-    float mass;
-};
-
 
 class Cube {
-    glm::vec3 rotation;
-    glm::vec3 color;
+
 
 
 public:
@@ -24,7 +16,11 @@ public:
     void SetVelocity(glm::vec3 newVelocity);
     void SetRotation(const glm::vec3& rotationIn);
     void SetColor(const glm::vec3& colorIn);
-
+    void SetMass(float massIn);
+	void SetInertia(const glm::mat3x3& inertiaIn);
+    
+    float GetMass();
+    glm::mat3x3 GetInertia();
     glm::vec3 GetPosition();
     glm::vec3 GetVelocity();
     std::vector<glm::vec3> GetVertices() const; // Add this method
@@ -33,12 +29,14 @@ public:
 
     void deleteBuffers();
 
-    void SetMassData(massData newMassData);
-    massData GetMassData();
 
 private:
     unsigned int VAO, VBO;
     glm::vec3 position;
     glm::vec3 velocity;
-    massData m_data;
+    glm::vec3 rotation;
+    glm::vec3 color;
+    glm::mat3x3 inertia;
+    glm::vec3 center;
+    float mass;
 };
