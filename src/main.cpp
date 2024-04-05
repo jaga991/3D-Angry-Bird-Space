@@ -1,3 +1,6 @@
+#define NOMINMAX
+#include <windows.h>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -6,6 +9,8 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/string_cast.hpp>
+
+
 
 #include "glad.c"
 #define STB_IMAGE_IMPLEMENTATION
@@ -117,13 +122,15 @@ int main()
 
 
     Cube cube1;
-    cube1.SetPosition(glm::vec3(1.2f, 1.2f, 1.2f));
-    cube1.SetRotation(glm::vec3(45.0f, 0.0f, 0.0f)); // Rotate 45 degrees around the x-axis
-
+    cube1.SetPosition(glm::vec3(2.0f, 0.0f,0.9f));
+    cube1.SetAngularVelocity(glm::vec3(0.1f,0.1f,0.1f));
+    cube1.SetVelocity(glm::vec3(-0.0005f, 0.0f,0.0f));
+ 
     cubes.push_back(cube1);
 
     Cube cube2;
     cube2.SetPosition(glm::vec3(0.0f, 0.0, 0.0f));
+
     cubes.push_back(cube2);
 
     unsigned int texture1, texture2;
@@ -223,31 +230,103 @@ int main()
         glBindVertexArray(floorVAO);
         glm::mat4 model = glm::mat4(1.0f);
         ourShader.setMat4("model", model);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        // glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
-        
         for (int i = 0; i < cubes.size(); i++)
         {
+            if (i == 0) {
+                std::cout<<glm::to_string(cubes[i].GetAngularVelocity())<<std::endl;
+            }
+            cubes[i].SetPosition(cubes[i].GetPosition() + cubes[i].GetVelocity());
+            //print angular velocity
+
+            cubes[i].SetRotation(cubes[i].GetRotation() + cubes[i].GetAngularVelocity());
+
             // Draw the cube
             cubes[i].Draw(ourShader);
-            //make cube 1 move
-            if (i == 0) { // Assuming cube1 is the first cube in the vector
-                cubes[i].SetPosition(cubes[i].GetPosition() + glm::vec3(-0.00001f,-0.00001f,-0.00001f));
+
+
+        }
+        // Check for collisions between all pairs of cubes
+        for (int i = 0; i < cubes.size(); i++) {
+            for (int j = i + 1; j < cubes.size(); j++) {
+                std::pair<bool, std::pair<glm::vec3, float>> result = areCubesColliding(cubes[i], cubes[j]);
+                //if SAT collision returns true
+                //resolve the collision immediately
+                //put the 2 cubes through a collision point checker, get all points of collision into a list
+                // run the list through a collision resolution function
+                // when list is empty, end the collision resolution
+                // continue with the next pair of collision
+
+                if (result.first) {
+                    glm::vec3 overlapAxis = result.second.first;
+                    float overlap = result.second.second;
+
+                    // Project the cubes onto the overlap axis
+                    float minProj1, maxProj1, minProj2, maxProj2;
+                    projectCubeOntoAxis(cubes[i], overlapAxis, minProj1, maxProj1);
+                    projectCubeOntoAxis(cubes[j], overlapAxis, minProj2, maxProj2);
+
+                    // Calculate the minimum and maximum overlap values
+                    float minOverlap = std::max(minProj1, minProj2);
+                    float maxOverlap = std::min(maxProj1, maxProj2);
+
+                    std::vector<glm::vec3> collidingVertices1 = getCollidingVertices(cubes[i], overlapAxis, minOverlap, maxOverlap);
+                    std::vector<glm::vec3> collidingVertices2 = getCollidingVertices(cubes[j], overlapAxis, minOverlap, maxOverlap);
+
+
+                    //get the average collision point
+                    glm::vec3 collidePointAvg;
+                    for (glm::vec3& vertex : collidingVertices1) {
+                        std::cout<< glm::to_string(vertex)<<std::endl;
+                        collidePointAvg += vertex;
+                    }
+                    for (glm::vec3& vertex : collidingVertices2) {
+                        std::cout<< glm::to_string(vertex)<<std::endl;
+                        collidePointAvg += vertex;
+                    }
+                    collidePointAvg = collidePointAvg / (float)(collidingVertices1.size() + collidingVertices2.size());
+                    
+                    // get the average of the two vertices
+                    
+
+
+
+
+                    
+                    // Collision resolution
+                    
+                     // Collision response
+                    float totalMass = cubes[i].GetMass() + cubes[j].GetMass();
+                    cubes[i].SetPosition(cubes[i].GetPosition() + overlapAxis * (overlap * (cubes[j].GetMass() / totalMass)));
+                    cubes[j].SetPosition(cubes[j].GetPosition() - overlapAxis * (overlap * (cubes[i].GetMass() / totalMass)));
+
+                    // Impulse resolution
+                    float restitution = 0.5f; // Coefficient of restitution - change this to suit your needs
+                    glm::vec3 relativeVelocity = cubes[i].GetVelocity() - cubes[j].GetVelocity();
+                    float impulseMagnitude = -(1 + restitution) * glm::dot(relativeVelocity, overlapAxis) / (1 / cubes[i].GetMass() + 1 / cubes[j].GetMass());
+                    glm::vec3 impulse = impulseMagnitude * overlapAxis;
+
+
+                    cubes[i].SetVelocity(cubes[i].GetVelocity() + impulse / cubes[i].GetMass());
+                    cubes[j].SetVelocity(cubes[j].GetVelocity() - impulse / cubes[j].GetMass());
+
+                    // Torque and angular velocity adjustment
+
+                    glm::vec3 r1 = collidePointAvg - cubes[i].GetPosition(); 
+                    glm::vec3 r2 = collidePointAvg - cubes[j].GetPosition(); 
+
+                    glm::vec3 torque1 = glm::cross(r1, impulse);
+                    glm::vec3 torque2 = glm::cross(r2, -impulse);
+
+                    cubes[i].SetAngularVelocity(cubes[i].GetAngularVelocity() + torque1);
+                    cubes[j].SetAngularVelocity(cubes[j].GetAngularVelocity() + torque2);
+
+                }
             }
-
-               
         }
 
-        if (areCubesColliding(cubes[0], cubes[1])) {
-            cubes[0].SetColor(glm::vec3(1.0f, 0.0f, 0.0f)); // Change the color to red
-            cubes[1].SetColor(glm::vec3(1.0f, 0.0f, 0.0f)); // Change the color to red
-
-        }
-        else {
-            cubes[0].SetColor(glm::vec3(0.0f, 1.0f, 0.0f)); // Change the color to red
-			cubes[1].SetColor(glm::vec3(0.0f, 1.0f, 0.0f)); // Change the color to green
-        }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

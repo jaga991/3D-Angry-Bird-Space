@@ -18,6 +18,7 @@ public:
     void SetColor(const glm::vec3& colorIn);
     void SetMass(float massIn);
 	void SetInertia(const glm::mat3x3& inertiaIn);
+    void SetAngularVelocity(const glm::vec3& newAngularVelocity);
     
     float GetMass();
     glm::mat3x3 GetInertia();
@@ -26,6 +27,9 @@ public:
     std::vector<glm::vec3> GetVertices() const; // Add this method
     std::vector<glm::vec3> GetEdges() const;
     std::vector<glm::vec3> GetFaceNormals() const;
+    glm::vec3 GetAngularVelocity();
+    glm::mat3x3 GetMomentOfInertia();
+    glm::vec3 GetRotation() const;
 
     void deleteBuffers();
 
@@ -38,5 +42,6 @@ private:
     glm::vec3 color;
     glm::mat3x3 inertia;
     glm::vec3 center;
+    glm::vec3 angularVelocity;
     float mass;
 };

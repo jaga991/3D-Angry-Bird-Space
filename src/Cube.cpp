@@ -3,7 +3,7 @@
 #include <vector>
 
 
-Cube::Cube() : position(0.0f, 0.0f, 0.0f), velocity(0.0f, 0.0f, 0.0f), color(0.0f, 1.0f, 0.0f), mass(1.0f){
+Cube::Cube() : position(0.0f, 0.0f, 0.0f), velocity(0.0f, 0.0f, 0.0f), color(0.0f, 1.0f, 0.0f), mass(1.0f), angularVelocity(0.0f,0.0f,0.0f){
     float vertices[] = {
            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
             0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -149,6 +149,8 @@ std::vector<glm::vec3> Cube::GetFaceNormals() const {
     return normals;
 }
 
+
+
 void Cube::SetPosition(glm::vec3 newPosition) {
     position = newPosition;
 }
@@ -174,6 +176,11 @@ void Cube::SetInertia(const glm::mat3x3& inertiaIn)
     this->inertia = inertiaIn;
 }
 
+void Cube::SetAngularVelocity(const glm::vec3& newAngularVelocity)
+{
+    	this->angularVelocity = newAngularVelocity;
+}
+
 
 
 glm::vec3 Cube::GetPosition() {
@@ -193,6 +200,23 @@ glm::mat3x3 Cube::GetInertia()
 {
     return inertia;
 }
+
+glm::vec3 Cube::GetAngularVelocity()
+{
+    return angularVelocity;
+}
+
+glm::mat3x3 Cube::GetMomentOfInertia() {
+    float I = 0.3f;
+    return glm::mat3x3(I, 0, 0,
+        0, I, 0,
+        0, 0, I);
+}
+
+glm::vec3 Cube::GetRotation() const {
+	return rotation;
+}
+
 
 void Cube::deleteBuffers() {
     glDeleteVertexArrays(1, &VAO);
