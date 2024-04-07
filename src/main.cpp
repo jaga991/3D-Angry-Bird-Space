@@ -1,3 +1,4 @@
+#include <thread>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -52,9 +53,11 @@ float lastFrame = 0.0f;
 
 
 //store a list of cubes
-std::vector<Cube> cubes;
+std::vector<Cube*> cubeList;
 
 
+//frame rate
+const float desiredFrameTime = 1.0f / 60.0f; // 60 FPS
 
 
 
@@ -116,15 +119,17 @@ int main()
     
 
 
-    Cube cube1;
-    cube1.SetPosition(glm::vec3(1.2f, 1.2f, 1.2f));
-    cube1.SetRotation(glm::vec3(45.0f, 0.0f, 0.0f)); // Rotate 45 degrees around the x-axis
+    Cube* cube1 = new Cube();
+    cube1->SetPosition(glm::vec3(-2.0f,-1.3f,-1.3f));
+    cube1->SetVelocity(glm::vec3(0.1f, 0.1f,0.1f));
+    cube1->SetRotation(glm::vec3(45.0f,45.0f,45.0f));
+    cubeList.push_back(cube1);
 
-    cubes.push_back(cube1);
+    Cube* cube2 = new Cube();
+    cube2->SetPosition(glm::vec3(0.0f, 0.0, 0.0f));
+    cube2->SetRotation(glm::vec3(0.0f,20.0f,0.0f));
+    cubeList.push_back(cube2);
 
-    Cube cube2;
-    cube2.SetPosition(glm::vec3(0.0f, 0.0, 0.0f));
-    cubes.push_back(cube2);
 
     unsigned int texture1, texture2;
     // texture 1
@@ -189,15 +194,17 @@ int main()
     // -----------
     while (!glfwWindowShouldClose(window))
     {
-        // per-frame time logic
-        // --------------------
-        float currentFrame = static_cast<float>(glfwGetTime());
+        //for camera movement
+        float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-
         // input
         // -----
         processInput(window);
+
+        //frame rate
+        float frameStart = glfwGetTime();
+
 
         // render
         // ------
@@ -223,42 +230,101 @@ int main()
         glBindVertexArray(floorVAO);
         glm::mat4 model = glm::mat4(1.0f);
         ourShader.setMat4("model", model);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        //draw floor
+        //glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
         
-        for (int i = 0; i < cubes.size(); i++)
+        for (int i = 0; i < cubeList.size(); i++)
         {
+            cubeList[i]->SetPosition(cubeList[i]->GetPosition() + cubeList[i]->GetVelocity() * deltaTime);
             // Draw the cube
-            cubes[i].Draw(ourShader);
-            //make cube 1 move
-            if (i == 0) { // Assuming cube1 is the first cube in the vector
-                cubes[i].SetPosition(cubes[i].GetPosition() + glm::vec3(-0.00001f,-0.00001f,-0.00001f));
+            cubeList[i]->Draw(ourShader);
+        }
+        //check each pair of cube for collision
+        for (int i = 0; i < cubeList.size(); i++) {
+
+            for (int j = i + 1; j < cubeList.size(); j++)
+            {
+                //if distance of cube center is more than 3, skip the collision check
+                if (glm::distance(cubeList[i]->GetPosition(), cubeList[j]->GetPosition()) > 3.0f) {
+                    continue;
+                }
+
+                std::pair<bool, std::pair<glm::vec3, float>> result = areCubesColliding(*cubeList[i], *cubeList[j]);
+                if (result.first)
+                {
+                    //get minimum translation vector and magnitude
+                    glm::vec3 mtv = result.second.first;
+                    float mtvMagnitude = result.second.second;
+
+                    std::cout << "MTV: " << glm::to_string(mtv) << " Magnitude: " << mtvMagnitude << std::endl;
+                    //print face normals of cube1
+                    std::vector<glm::vec3> normals1 = cubeList[i]->GetFaceNormals();
+                    std::cout << "Cube1 Face Normals: " << std::endl;
+                    for (glm::vec3& normal : normals1) {
+                        std::cout << glm::to_string(normal) << std::endl;
+                    }
+
+                    //print face normals of cube2
+                    std::vector<glm::vec3> normals2 = cubeList[j]->GetFaceNormals();
+                    std::cout << "Cube2 Face Normals: " << std::endl;
+                    for (glm::vec3& normal : normals2) {
+                        std::cout << glm::to_string(normal) << std::endl;
+                    }
+                    //check collision type
+                    int collisionType = detectCollisionType(*cubeList[i], *cubeList[j], mtv, mtvMagnitude);
+                    std::cout << "collition type: " << collisionType << std::endl;
+                    //print collision type
+                    if (collisionType == 1) {
+						std::cout << "Face-Vertex Collision" << std::endl;
+					}
+					else if (collisionType == 2) {
+						std::cout << "Edge-Edge Collision" << std::endl;
+					}
+                    //get contact point
+                    glm::vec3 contactPoint = getContactPoint(*cubeList[i], *cubeList[j], collisionType, mtv, mtvMagnitude);
+                    std::cout << "Contact Point: " << glm::to_string(contactPoint) << std::endl;
+                    cubeList[i]->SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
+                    cubeList[j]->SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
+                }
+                else
+                {
+                    cubeList[i]->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+                    cubeList[j]->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+                }
             }
-
-               
-        }
-
-        if (areCubesColliding(cubes[0], cubes[1])) {
-            cubes[0].SetColor(glm::vec3(1.0f, 0.0f, 0.0f)); // Change the color to red
-            cubes[1].SetColor(glm::vec3(1.0f, 0.0f, 0.0f)); // Change the color to red
-
-        }
-        else {
-            cubes[0].SetColor(glm::vec3(0.0f, 1.0f, 0.0f)); // Change the color to red
-			cubes[1].SetColor(glm::vec3(0.0f, 1.0f, 0.0f)); // Change the color to green
         }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+
+        // Frame limiting
+        float frameEnd = glfwGetTime();
+        float frameTime = frameEnd - frameStart; // Time taken for this frame
+        if (frameTime < desiredFrameTime)
+        {
+            float timeToSleep = desiredFrameTime - frameTime; // Remaining time to reach desired frame time
+            int timeToSleepInMs = static_cast<int>(timeToSleep * 1000);
+            std::this_thread::sleep_for(std::chrono::milliseconds(timeToSleepInMs)); // Sleep for the remaining time
+        }
     }
 
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
     // glfw: terminate, clearing all previously allocated GLFW resources.
+    // 
     // ------------------------------------------------------------------
+    for (int i = 0; i < cubeList.size(); i++)
+    {
+        delete cubeList[i];
+    }
+    cubeList.clear();
+
     glfwTerminate();
     return 0;
 }
@@ -284,9 +350,9 @@ void processInput(GLFWwindow* window)
     if (!wasRightMouseButtonPressed && isRightMouseButtonPressed)
     {
         // The right mouse button was just clicked
-        Cube newCube;
-        newCube.SetPosition(camera.Position);
-        cubes.push_back(newCube);
+        Cube* newCube = new Cube();
+        newCube->SetPosition(camera.Position);
+        cubeList.push_back(newCube);
     }
 
     wasRightMouseButtonPressed = isRightMouseButtonPressed;
