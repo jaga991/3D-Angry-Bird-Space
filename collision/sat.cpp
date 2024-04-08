@@ -198,8 +198,7 @@ glm::vec3 getContactPoint(const Cube& cube1, const Cube& cube2, int collisionTyp
                 break;
             }
         }
-        std::cout << "validNormal1: " << validNormal1.x << " " << validNormal1.y << " " << validNormal1.z << std::endl;
-        std::cout << "validNormal2: " << validNormal2.x << " " << validNormal2.y << " " << validNormal2.z << std::endl;
+
         
         //find the edge of cube1 and 2 that is involved in the collision
         std::vector<std::pair<glm::vec3, glm::vec3>> edges1 = cube1.GetEdges();
@@ -207,7 +206,7 @@ glm::vec3 getContactPoint(const Cube& cube1, const Cube& cube2, int collisionTyp
         std::vector<std::pair<glm::vec3, glm::vec3>> validEdges1;
         std::vector<std::pair<glm::vec3, glm::vec3>> validEdges2;
 
-        //find the edges that are parallel to the valid normal
+        //find the edges that are parallel to the valid norm
         for (std::pair<glm::vec3, glm::vec3>& edge : edges1) {
             glm::vec3 edgeVector = edge.second - edge.first;
             if (glm::length(glm::cross(edgeVector, validNormal1)) < 0.0001f) {
@@ -223,10 +222,10 @@ glm::vec3 getContactPoint(const Cube& cube1, const Cube& cube2, int collisionTyp
 
         std::cout<<"printing out valid edges"<<std::endl;
         for (std::pair<glm::vec3, glm::vec3>& edge : validEdges1) {
-            std::cout << "validEdges1: " << edge.first.x << " " << edge.first.y << " " << edge.first.z << " to " << edge.second.x << " " << edge.second.y << " " << edge.second.z << std::endl;
+            //std::cout << "validEdges1: " << edge.first.x << " " << edge.first.y << " " << edge.first.z << " to " << edge.second.x << " " << edge.second.y << " " << edge.second.z << std::endl;
         }
         for (std::pair<glm::vec3, glm::vec3>& edge : validEdges2) {
-            std::cout << "validEdges2: " << edge.first.x << " " << edge.first.y << " " << edge.first.z << " to " << edge.second.x << " " << edge.second.y << " " << edge.second.z << std::endl;
+            //std::cout << "validEdges2: " << edge.first.x << " " << edge.first.y << " " << edge.first.z << " to " << edge.second.x << " " << edge.second.y << " " << edge.second.z << std::endl;
         }
 
 

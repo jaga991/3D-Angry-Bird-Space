@@ -48,7 +48,11 @@ Cube::Cube() : position(0.0f, 0.0f, 0.0f), velocity(0.0f, 0.0f, 0.0f), color(0.0
            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
 
-    inertia = glm::mat3x3(0.3f);
+    float a = 1.0f; // Assuming the side length of the cube is 1.0f
+    float I_value = 1.0f / 6.0f * GetMass() * a * a;
+    inertia = glm::mat3(I_value, 0.0f, 0.0f,
+        0.0f, I_value, 0.0f,
+        0.0f, 0.0f, I_value);
 
 
     glGenVertexArrays(1, &VAO);
