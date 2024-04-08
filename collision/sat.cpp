@@ -2,8 +2,6 @@
 
 std::pair<bool, std::pair<glm::vec3, float>>areCubesColliding(const Cube& cube1, const Cube& cube2) {
     // Get the edges of the cubes
-    std::vector<glm::vec3> edges1 = cube1.GetEdges();
-    std::vector<glm::vec3> edges2 = cube2.GetEdges();
     std::vector<glm::vec3> normals1 = cube1.GetFaceNormals();
     std::vector<glm::vec3> normals2 = cube2.GetFaceNormals();
 
@@ -204,35 +202,105 @@ glm::vec3 getContactPoint(const Cube& cube1, const Cube& cube2, int collisionTyp
         std::cout << "validNormal2: " << validNormal2.x << " " << validNormal2.y << " " << validNormal2.z << std::endl;
         
         //find the edge of cube1 and 2 that is involved in the collision
-        std::vector<glm::vec3> edges1 = cube1.GetEdges();
-        std::vector<glm::vec3> edges2 = cube2.GetEdges();
-        std::vector<glm::vec3> validEdges1;
-        std::vector<glm::vec3> validEdges2;
+        std::vector<std::pair<glm::vec3, glm::vec3>> edges1 = cube1.GetEdges();
+        std::vector<std::pair<glm::vec3, glm::vec3>> edges2 = cube2.GetEdges();
+        std::vector<std::pair<glm::vec3, glm::vec3>> validEdges1;
+        std::vector<std::pair<glm::vec3, glm::vec3>> validEdges2;
 
-        //find the edges that is parallel to the valid normal
-        for (glm::vec3& edge : edges1) {
-            std::cout << "edge: " << edge.x << " " << edge.y << " " << edge.z << std::endl;
-            //print out the length
-            std::cout << "length: " << glm::length(glm::cross(edge, validNormal1)) << std::endl;
-            if (glm::length(glm::cross(edge, validNormal1)) < 0.0001f) {
-				validEdges1.push_back(edge);
-			}
-		}
-        for (glm::vec3& edge : edges2) {
-            if (glm::length(glm::cross(edge, validNormal2)) < 0.0001f) {
-				validEdges2.push_back(edge);
-			}
-		}
+        //find the edges that are parallel to the valid normal
+        for (std::pair<glm::vec3, glm::vec3>& edge : edges1) {
+            glm::vec3 edgeVector = edge.second - edge.first;
+            if (glm::length(glm::cross(edgeVector, validNormal1)) < 0.0001f) {
+                validEdges1.push_back(edge);
+            }
+        }
+        for (std::pair<glm::vec3, glm::vec3>& edge : edges2) {
+            glm::vec3 edgeVector = edge.second - edge.first;
+            if (glm::length(glm::cross(edgeVector, validNormal2)) < 0.0001f) {
+                validEdges2.push_back(edge);
+            }
+        }
 
         std::cout<<"printing out valid edges"<<std::endl;
-        // print out valid edges 1 and 2
-        for (glm::vec3& edge : validEdges1) {
-			std::cout << "validEdges1: " << edge.x << " " << edge.y << " " << edge.z << std::endl;
-		}
-        for (glm::vec3& edge : validEdges2) {
-            std::cout << "validEdges2: " << edge.x << " " << edge.y << " " << edge.z << std::endl;
+        for (std::pair<glm::vec3, glm::vec3>& edge : validEdges1) {
+            std::cout << "validEdges1: " << edge.first.x << " " << edge.first.y << " " << edge.first.z << " to " << edge.second.x << " " << edge.second.y << " " << edge.second.z << std::endl;
         }
-        return glm::vec3(0.0f);
+        for (std::pair<glm::vec3, glm::vec3>& edge : validEdges2) {
+            std::cout << "validEdges2: " << edge.first.x << " " << edge.first.y << " " << edge.first.z << " to " << edge.second.x << " " << edge.second.y << " " << edge.second.z << std::endl;
+        }
+
+
+
+        //find the closest edge of cube1 from center of cube 2
+        glm::vec3 center2 = cube2.GetPosition();
+        std::pair<glm::vec3, glm::vec3> closestEdge1;
+        float minDistance1 = std::numeric_limits<float>::max();
+        //for each edge in validEdges1
+        for (std::pair<glm::vec3, glm::vec3>& edge : validEdges1) {
+            glm::vec3 edgeCenter = (edge.first + edge.second) / 2.0f;
+            float distance = glm::length(center2 - edgeCenter);
+            if (distance < minDistance1) {
+                minDistance1 = distance;
+                closestEdge1 = edge;
+            }
+        }
+
+        //find the closest edge of cube2 from center of cube 1
+        glm::vec3 center1 = cube1.GetPosition();
+        std::pair<glm::vec3, glm::vec3> closestEdge2;
+        float minDistance2 = std::numeric_limits<float>::max();
+        //for each edge in validEdges2
+        for (std::pair<glm::vec3, glm::vec3>& edge : validEdges2) {
+			glm::vec3 edgeCenter = (edge.first + edge.second) / 2.0f;
+			float distance = glm::length(center1 - edgeCenter);
+            if (distance < minDistance2) {
+				minDistance2 = distance;
+				closestEdge2 = edge;
+			}
+		}
+
+        // Calculate the line of shortest distance between the two edges
+        std::pair<glm::vec3, glm::vec3> shortestLine = calculateShortestLine(closestEdge1, closestEdge2);
+
+        // The contact point is the midpoint of the shortest line
+        glm::vec3 contactPoint = (shortestLine.first + shortestLine.second) / 2.0f;
+
+        // Now contactPoint is the contact point between the two cubes
+        return contactPoint;
+
+
+    }
+}
+
+
+std::pair<glm::vec3, glm::vec3> calculateShortestLine(std::pair<glm::vec3, glm::vec3> line1, std::pair<glm::vec3, glm::vec3> line2) {
+    glm::vec3 u = line1.second - line1.first;
+    glm::vec3 v = line2.second - line2.first;
+    glm::vec3 w = line1.first - line2.first;
+
+    float a = glm::dot(u, u);
+    float b = glm::dot(u, v);
+    float c = glm::dot(v, v);
+    float d = glm::dot(u, w);
+    float e = glm::dot(v, w);
+    float D = a * c - b * b;
+    float sc, tc;
+
+    // compute the line parameters of the two closest points
+    if (D < 0.0001f) {          // the lines are almost parallel
+        sc = 0.0;
+        tc = (b > c ? d / b : e / c);    // use the largest denominator
+    }
+    else {
+        sc = (b * e - c * d) / D;
+        tc = (a * e - b * d) / D;
     }
 
+    // get the difference of the two closest points
+    glm::vec3 dP = w + (sc * u) - (tc * v);  // = line1(sc) - line2(tc)
+
+    glm::vec3 closestPointOnLine1 = line1.first + sc * u;
+    glm::vec3 closestPointOnLine2 = line2.first + tc * v;
+
+    return { closestPointOnLine1, closestPointOnLine2 };    // return the closest points
 }

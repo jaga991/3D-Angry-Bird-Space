@@ -57,7 +57,7 @@ std::vector<Cube*> cubeList;
 
 
 //frame rate
-const float desiredFrameTime = 1.0f / 60.0f; // 60 FPS
+const float desiredFrameTime = 1.0f / 1.0f; // 60 FPS
 
 
 
@@ -120,15 +120,22 @@ int main()
 
 
     Cube* cube1 = new Cube();
-    cube1->SetPosition(glm::vec3(-2.0f,-1.3f,-1.3f));
-    cube1->SetVelocity(glm::vec3(0.1f, 0.1f,0.1f));
-    cube1->SetRotation(glm::vec3(45.0f,45.0f,45.0f));
+    cube1->SetPosition(glm::vec3(-2.0f, 0.9f, 0.0f));
+    cube1->SetVelocity(glm::vec3(0.5f, 0.0f,0.0f));
+    cube1->SetAngularVelocity(glm::vec3(50.0f, 0.0f, 0.0f));
+    cube1->SetRotation(glm::vec3(45.0f, 45.0f, 0.0f));
     cubeList.push_back(cube1);
 
     Cube* cube2 = new Cube();
     cube2->SetPosition(glm::vec3(0.0f, 0.0, 0.0f));
-    cube2->SetRotation(glm::vec3(0.0f,20.0f,0.0f));
+    cube2->SetRotation(glm::vec3(0.0f,0.0f,0.0f));
+    cube2->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+    cube2->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
     cubeList.push_back(cube2);
+
+    Cube* cube3 = new Cube();
+    cube3->SetPosition(glm::vec3(2.0f, 2.0f, 0.0f));
+    cubeList.push_back(cube3);
 
 
     unsigned int texture1, texture2;
@@ -239,6 +246,11 @@ int main()
         for (int i = 0; i < cubeList.size(); i++)
         {
             cubeList[i]->SetPosition(cubeList[i]->GetPosition() + cubeList[i]->GetVelocity() * deltaTime);
+            cubeList[i]->SetRotation(cubeList[i]->GetRotation() + cubeList[i]->GetAngularVelocity() * deltaTime);
+            //print out rotation
+            if (i == 0) {
+                std::cout << "Rotation: " << glm::to_string(cubeList[i]->GetRotation()) << std::endl;
+            }
             // Draw the cube
             cubeList[i]->Draw(ourShader);
         }
@@ -288,6 +300,60 @@ int main()
                     std::cout << "Contact Point: " << glm::to_string(contactPoint) << std::endl;
                     cubeList[i]->SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
                     cubeList[j]->SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
+
+                    // Collision resolution
+
+                     // Collision response
+                    //float totalMass = cubeList[i]->GetMass() + cubeList[j]->GetMass();
+                    //cubeList[i]->SetPosition(cubeList[i]->GetPosition() + mtv * (mtvMagnitude * (cubeList[j]->GetMass() / totalMass)));
+                    //cubeList[j]->SetPosition(cubeList[j]->GetPosition() - mtv * (mtvMagnitude * (cubeList[i]->GetMass() / totalMass)));
+
+                    //// Impulse resolution
+                    //float restitution = 0.5f; // Coefficient of restitution - change this to suit your needs
+                    //glm::vec3 relativeVelocity = cubeList[i]->GetVelocity() - cubeList[j]->GetVelocity();
+                    //float impulseMagnitude = -(1 + restitution) * glm::dot(relativeVelocity, mtv) / (1 / cubeList[i]->GetMass() + 1 / cubeList[j]->GetMass());
+                    //glm::vec3 impulse = 10.0f*impulseMagnitude * mtv;
+
+
+                    //cubeList[i]->SetVelocity(cubeList[i]->GetVelocity() + impulse / cubeList[i]->GetMass());
+                    //cubeList[j]->SetVelocity(cubeList[j]->GetVelocity() - impulse / cubeList[j]->GetMass());
+
+                    //// Torque and angular velocity adjustment
+
+                    //glm::vec3 r1 = contactPoint - cubeList[i]->GetPosition();
+                    //glm::vec3 r2 = contactPoint - cubeList[j]->GetPosition();
+
+                    //glm::vec3 torque1 = glm::cross(r1, impulse) * 10.0f;
+                    //glm::vec3 torque2 = glm::cross(r2, -impulse) * 10.0f;
+
+                    //cubeList[i]->SetAngularVelocity(cubeList[i]->GetAngularVelocity() + torque1);
+                    //cubeList[j]->SetAngularVelocity(cubeList[j]->GetAngularVelocity() + torque2);
+
+                     //Collision resolution
+                     //resolve tunnelling
+
+                    float totalMass = cubeList[i]->GetMass() + cubeList[j]->GetMass();
+                    cubeList[i]->SetPosition(cubeList[i]->GetPosition() + mtv * (mtvMagnitude * (cubeList[i]->GetMass() / totalMass)));
+                    cubeList[j]->SetPosition(cubeList[j]->GetPosition() - mtv * (mtvMagnitude * (cubeList[j]->GetMass() / totalMass)));
+
+                    glm::vec3 Vab = cubeList[i]->GetVelocity() - cubeList[j]->GetVelocity();
+
+                    glm::vec3 Rap = contactPoint - cubeList[i]->GetPosition();
+                    float Ma = cubeList[i]->GetMass();
+                    glm::mat3x3 Ia = cubeList[i]->GetInertia();
+
+                    glm::vec3 Rbp = contactPoint - cubeList[j]->GetPosition();
+                    float Mb = cubeList[j]->GetMass();
+                    glm::mat3x3 Ib = cubeList[j]->GetInertia();
+
+                    float restitution = 1.0f;
+                    glm::vec3 impulse = glm::vec3(-(1.0f + restitution) * glm::dot(Vab, mtv) / (1.0f / Ma + 1.0f / Mb + glm::dot(glm::cross(Ia * glm::cross(Rap, mtv), Rap) + glm::cross(Ib * glm::cross(Rbp, mtv), Rbp), mtv)));
+
+                    cubeList[i]->SetVelocity(cubeList[i]->GetVelocity() + impulse / Ma);
+                    cubeList[j]->SetVelocity(cubeList[j]->GetVelocity() - impulse / Mb);
+                    cubeList[i]->SetAngularVelocity(cubeList[i]->GetAngularVelocity() + Ia * glm::cross(Rap, impulse));
+                    cubeList[j]->SetAngularVelocity(cubeList[j]->GetAngularVelocity() - Ib * glm::cross(Rbp, impulse));
+
                 }
                 else
                 {

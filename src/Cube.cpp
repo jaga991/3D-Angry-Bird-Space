@@ -3,7 +3,7 @@
 #include <vector>
 
 
-Cube::Cube() : position(0.0f, 0.0f, 0.0f), velocity(0.0f, 0.0f, 0.0f), color(0.0f, 1.0f, 0.0f), mass(1.0f){
+Cube::Cube() : position(0.0f, 0.0f, 0.0f), velocity(0.0f, 0.0f, 0.0f), color(0.0f, 1.0f, 0.0f), mass(1.0f), angularVelocity(0.0f,0.0f,0.0f){
     float vertices[] = {
            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
             0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -48,7 +48,7 @@ Cube::Cube() : position(0.0f, 0.0f, 0.0f), velocity(0.0f, 0.0f, 0.0f), color(0.0
            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
 
-    inertia = glm::mat3x3(1.0f);
+    inertia = glm::mat3x3(0.3f);
 
 
     glGenVertexArrays(1, &VAO);
@@ -109,24 +109,24 @@ std::vector<glm::vec3> Cube::GetVertices() const {
 }
 
 
-std::vector<glm::vec3> Cube::GetEdges() const {
+std::vector<std::pair<glm::vec3, glm::vec3>> Cube::GetEdges() const {
     // Get the vertices of the cube
     std::vector<glm::vec3> vertices = GetVertices();
 
     // Define the edges
-    std::vector<glm::vec3> edges = {
-        vertices[1] - vertices[0], // Edge from vertex 0 to vertex 1
-        vertices[2] - vertices[1], // Edge from vertex 1 to vertex 2
-        vertices[3] - vertices[2], // Edge from vertex 2 to vertex 3
-        vertices[0] - vertices[3], // Edge from vertex 3 to vertex 0
-        vertices[5] - vertices[4], // Edge from vertex 4 to vertex 5
-        vertices[6] - vertices[5], // Edge from vertex 5 to vertex 6
-        vertices[7] - vertices[6], // Edge from vertex 6 to vertex 7
-        vertices[4] - vertices[7], // Edge from vertex 7 to vertex 4
-        vertices[4] - vertices[0], // Edge from vertex 0 to vertex 4
-        vertices[5] - vertices[1], // Edge from vertex 1 to vertex 5
-        vertices[6] - vertices[2], // Edge from vertex 2 to vertex 6
-        vertices[7] - vertices[3]  // Edge from vertex 3 to vertex 7
+    std::vector<std::pair<glm::vec3, glm::vec3>> edges = {
+        {vertices[0], vertices[1]}, // Edge from vertex 0 to vertex 1
+        {vertices[1], vertices[2]}, // Edge from vertex 1 to vertex 2
+        {vertices[2], vertices[3]}, // Edge from vertex 2 to vertex 3
+        {vertices[3], vertices[0]}, // Edge from vertex 3 to vertex 0
+        {vertices[4], vertices[5]}, // Edge from vertex 4 to vertex 5
+        {vertices[5], vertices[6]}, // Edge from vertex 5 to vertex 6
+        {vertices[6], vertices[7]}, // Edge from vertex 6 to vertex 7
+        {vertices[7], vertices[4]}, // Edge from vertex 7 to vertex 4
+        {vertices[0], vertices[4]}, // Edge from vertex 0 to vertex 4
+        {vertices[1], vertices[5]}, // Edge from vertex 1 to vertex 5
+        {vertices[2], vertices[6]}, // Edge from vertex 2 to vertex 6
+        {vertices[3], vertices[7]}  // Edge from vertex 3 to vertex 7
     };
 
     return edges;
@@ -157,6 +157,11 @@ void Cube::SetVelocity(glm::vec3 newVelocity) {
     velocity = newVelocity;
 }
 
+void Cube::SetAngularVelocity(glm::vec3 angularVelocityIn)
+{
+	angularVelocity = angularVelocityIn;
+}
+
 void Cube::SetRotation(const glm::vec3& rotationIn) {
     this->rotation = rotationIn;
 }
@@ -176,12 +181,22 @@ void Cube::SetInertia(const glm::mat3x3& inertiaIn)
 
 
 
-glm::vec3 Cube::GetPosition() {
+glm::vec3 Cube::GetPosition() const {
     return position;
 }
 
 glm::vec3 Cube::GetVelocity() {
     return velocity;
+}
+
+glm::vec3 Cube::GetAngularVelocity()
+{
+	return angularVelocity;
+}
+
+glm::vec3 Cube::GetRotation()
+{
+	return rotation;
 }
 
 float Cube::GetMass()
