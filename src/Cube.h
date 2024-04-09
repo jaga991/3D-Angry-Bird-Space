@@ -16,6 +16,8 @@ public:
     void SetVelocity(glm::vec3 newVelocity);
     void SetAngularVelocity(glm::vec3 angularVelocityIn);
     void SetRotation(const glm::vec3& rotationIn);
+    void SetScale(const glm::vec3& scaleIn);
+    glm::vec3 GetScale() const;
     void SetColor(const glm::vec3& colorIn);
     void SetMass(float massIn);
 	void SetInertia(const glm::mat3x3& inertiaIn);
@@ -42,5 +44,6 @@ private:
     glm::mat3x3 inertia;
     glm::vec3 center;
     glm::vec3 angularVelocity;
+    glm::vec3 scale;
     float mass;
 };

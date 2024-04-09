@@ -120,9 +120,9 @@ int detectCollisionType(const Cube& cube1, const Cube& cube2, glm::vec3 mtv, flo
 
 glm::vec3 getContactPoint(const Cube& cube1, const Cube& cube2, int collisionType, glm::vec3 mtv, float mtvMagnitude) {
 	// Get the vertices of the cubes
-    std::cout<<"start of getContactPoint"<<std::endl;
+    //std::cout<<"start of getContactPoint"<<std::endl;
     if (collisionType == 1) {
-        std::cout<<"start of collisionType 1"<<std::endl;
+        //std::cout<<"start of collisionType 1"<<std::endl;
         //find out which cube is the one that is face colliding
         Cube faceCollidingCube;
         Cube vertexCollidingCube;
@@ -156,7 +156,7 @@ glm::vec3 getContactPoint(const Cube& cube1, const Cube& cube2, int collisionTyp
                 closestVertex = vertices[i];
                 minDistance = distance;
             }
-            std::cout << "closestVertex: " << closestVertex.x << " " << closestVertex.y << " " << closestVertex.z << std::endl;
+            //std::cout << "closestVertex: " << closestVertex.x << " " << closestVertex.y << " " << closestVertex.z << std::endl;
             return closestVertex;
         }
 
@@ -164,7 +164,7 @@ glm::vec3 getContactPoint(const Cube& cube1, const Cube& cube2, int collisionTyp
 
     // if its an edge edge collision
     if (collisionType == 2) {
-        std::cout << "start of collisionType 2" << std::endl;
+        //std::cout << "start of collisionType 2" << std::endl;
 
         //get the face normals of both cubes
         std::vector<glm::vec3> faceNormal1;
@@ -220,7 +220,7 @@ glm::vec3 getContactPoint(const Cube& cube1, const Cube& cube2, int collisionTyp
             }
         }
 
-        std::cout<<"printing out valid edges"<<std::endl;
+        //std::cout<<"printing out valid edges"<<std::endl;
         for (std::pair<glm::vec3, glm::vec3>& edge : validEdges1) {
             //std::cout << "validEdges1: " << edge.first.x << " " << edge.first.y << " " << edge.first.z << " to " << edge.second.x << " " << edge.second.y << " " << edge.second.z << std::endl;
         }

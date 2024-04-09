@@ -3,7 +3,7 @@
 #include <vector>
 
 
-Cube::Cube() : position(0.0f, 0.0f, 0.0f), velocity(0.0f, 0.0f, 0.0f), color(0.0f, 1.0f, 0.0f), mass(1.0f), angularVelocity(0.0f,0.0f,0.0f){
+Cube::Cube() : position(0.0f, 0.0f, 0.0f), velocity(0.0f, 0.0f, 0.0f), color(0.0f, 1.0f, 0.0f), mass(1.0f), angularVelocity(0.0f,0.0f,0.0f), scale(1.0f,1.0f,1.0f){
     float vertices[] = {
            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
             0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -77,6 +77,8 @@ void Cube::Draw(Shader& shader) {
     model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
     model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
     model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::scale(model, scale);  // Apply scale to the model matrix
+
     shader.setVec3("color", color);
     shader.setMat4("model", model);
     glBindVertexArray(VAO);
@@ -86,7 +88,8 @@ void Cube::Draw(Shader& shader) {
 std::vector<glm::vec3> Cube::GetVertices() const {
     // Create the model matrix
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, position);
+    model = glm::translate(model, position); // Apply the translation
+    model = glm::scale(model, scale); // Apply the scale
     model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
     model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
     model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -183,6 +186,15 @@ void Cube::SetInertia(const glm::mat3x3& inertiaIn)
     this->inertia = inertiaIn;
 }
 
+// Add a method to set the scale
+void Cube::SetScale(const glm::vec3& scaleIn) {
+    scale = scaleIn;
+}
+
+// Add a method to get the scale
+glm::vec3 Cube::GetScale() const {
+    return scale;
+}
 
 
 glm::vec3 Cube::GetPosition() const {
