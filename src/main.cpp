@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <cstdlib> // for std::rand and std::srand
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/string_cast.hpp>
@@ -20,6 +21,7 @@
 #include <vector>
 
 #include "../collision/sat.h"
+#include <set>
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
@@ -35,8 +37,24 @@ float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 bool wasRightMouseButtonPressed = false;
 
+//physics constants
+float restitution = 0.5f; // Coefficient of restitution - change this to suit your needs
+float gravity = -2.0f; // Acceleration due to gravity - change this to suit your needs
+float friction = 0.5f; // Coefficient of friction - change this to suit your needs
+float airResistance = 0.1f; // Coefficient of air resistance - change this to suit your needs
 
 
+
+float floorVertices[] = {
+    // positions          // texture Coords 
+     5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+    -5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
+    -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+
+     5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+    -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+     5.0f, -0.5f, -5.0f,  2.0f, 2.0f
+};
 
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
@@ -48,12 +66,20 @@ std::vector<Cube*> cubeList;
 
 
 //frame rate
-const float desiredFrameTime = 1.0f / 1.0f; // 60 FPS
+const float desiredFrameTime = 1.0f / 120.0; // 60 FPS
 
-// Define constants for gravity and air resistance
-const glm::vec3 GRAVITY = glm::vec3(0.0f, -0.2f, 0.0f); // Gravity pulls down
-const float AIR_RESISTANCE = 0.1f; // Adjust this value to suit your needs
 
+struct pair_comparator {
+    bool operator() (const std::pair<Cube*, Cube*>& a, const std::pair<Cube*, Cube*>& b) const {
+        // Order the pairs so that the smaller pointer is always first
+        Cube* a1 = a.first < a.second ? a.first : a.second;
+        Cube* a2 = a.first < a.second ? a.second : a.first;
+        Cube* b1 = b.first < b.second ? b.first : b.second;
+        Cube* b2 = b.first < b.second ? b.second : b.first;
+
+        return std::tie(a1, a2) < std::tie(b1, b2);
+    }
+};
 
 
 int main()
@@ -96,27 +122,36 @@ int main()
     // ------------------------------------
     Shader ourShader("Linking\\shader\\shader.vs", "Linking\\shader\\shader.fs");
 
-   
-	// load and create a texture
+    unsigned int floorVAO, floorVBO;
+    glGenVertexArrays(1, &floorVAO);
+    glGenBuffers(1, &floorVBO);
+    glBindVertexArray(floorVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, floorVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(floorVertices), floorVertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glBindVertexArray(0);
+
+    // load and create a texture
     // -------------------------
-    
 
 
 
 
 
- 
+
     for (int i = 0; i < 4; i++) {
 
-
-    //create floor cube
-    Cube* floor = new Cube();
-    floor->SetPosition(glm::vec3(0.0f, -0.5f, 0.0f));
-    floor->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
-    floor->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
-    floor->SetScale(glm::vec3(10.0f, 0.0f, 10.0f));
-    floor->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
-
+        float x = 0.0f + 1.0f * i;
+        Cube* cube = new Cube();
+        cube->SetPosition(glm::vec3(0.0f, x, 0.0f));
+        cube->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+        cube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+        cube->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+        cubeList.push_back(cube);
+    }
 
     unsigned int texture1, texture2;
     // texture 1
@@ -167,30 +202,6 @@ int main()
         std::cout << "Failed to load texture" << std::endl;
     }
     stbi_image_free(data);
-    // texture 3
-    // ---------
-    unsigned int grassTexture;
-    glGenTextures(1, &grassTexture);
-    glBindTexture(GL_TEXTURE_2D, grassTexture);
-    // set the texture wrapping parameters
-    
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // load image, create texture and generate mipmaps
-    data = stbi_load("Linking\\texture\\grass.png", &width, &height, &nrChannels, 0);
-    if (data)
-    {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-    else
-    {
-		std::cout << "Failed to load texture" << std::endl;
-	}
-    
 
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     // -------------------------------------------------------------------------------------------
@@ -200,13 +211,12 @@ int main()
     // or set it via the texture class
     ourShader.setInt("texture2", 1);
 
-
-    // render loop
+    std::set<std::pair<Cube*, Cube*>, pair_comparator> collidingCubes;    // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
     {
         //for camera movement
-        float currentFrame = glfwGetTime();
+        double currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         // input
@@ -214,7 +224,7 @@ int main()
         processInput(window);
 
         //frame rate
-        float frameStart = glfwGetTime();
+        double frameStart = glfwGetTime();
 
 
         // render
@@ -227,9 +237,6 @@ int main()
         glBindTexture(GL_TEXTURE_2D, texture1);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, grassTexture);
-
 
         // activate shader
         ourShader.use();
@@ -241,43 +248,54 @@ int main()
         // camera/view transformation
         glm::mat4 view = camera.GetViewMatrix();
         ourShader.setMat4("view", view);
-        // draw floor
+        glBindVertexArray(floorVAO);
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, floor->GetPosition());
-        model = glm::scale(model, floor->GetScale());
         ourShader.setMat4("model", model);
-        floor->Draw(ourShader);
 
         //draw floor
         //glDrawArrays(GL_TRIANGLES, 0, 6);
 
+        std::pair<bool, std::pair<glm::vec3, float>> result;
 
-        
         for (int i = 0; i < cubeList.size(); i++)
         {
+            //apply gravity
+            cubeList[i]->SetVelocity(cubeList[i]->GetVelocity() + glm::vec3(0.0f, gravity, 0.0f) * deltaTime);
 
-            // Apply gravity
-            cubeList[i]->SetVelocity(cubeList[i]->GetVelocity() + GRAVITY * deltaTime);
+            ////apply air resistance
+            //cubeList[i]->SetVelocity(cubeList[i]->GetVelocity() * (1.0f - airResistance * deltaTime));
+            //cubeList[i]->SetAngularVelocity(cubeList[i]->GetAngularVelocity() * (1.0f - airResistance * deltaTime));
 
-            // Apply air resistance
-            cubeList[i]->SetVelocity(cubeList[i]->GetVelocity() * (1.0f - AIR_RESISTANCE * deltaTime));
-            cubeList[i]->SetAngularVelocity(cubeList[i]->GetAngularVelocity() * (1.0f - AIR_RESISTANCE * deltaTime));
-
+            // Update the position and rotation of the cube
             cubeList[i]->SetPosition(cubeList[i]->GetPosition() + cubeList[i]->GetVelocity() * deltaTime);
             cubeList[i]->SetRotation(cubeList[i]->GetRotation() + cubeList[i]->GetAngularVelocity() * deltaTime);
-            floorCubeResult = areCubesColliding(*cubeList[i], *floor);
-            if (floorCubeResult.first)
-            {
-                // Collision resolution
-				glm::vec3 mtv = floorCubeResult.second.first;
-				float mtvMagnitude = floorCubeResult.second.second;
-				cubeList[i]->SetPosition(cubeList[i]->GetPosition() + mtv * mtvMagnitude);
-			}
 
             // Draw the cube
             cubeList[i]->Draw(ourShader);
-
         }
+
+        //floor collision checker
+        for (Cube* cube : cubeList) {
+
+            float floorY = -0.5f; // The y-coordinate of the floor
+
+            if (cube->GetPosition().y - 0.5f < floorY) { // If the cube is below the floor
+
+                //apply friction
+                //cube->SetVelocity(cube->GetVelocity() * (1.0f - friction * deltaTime));
+                //cube->SetAngularVelocity(cube->GetAngularVelocity() * (1.0f - friction * deltaTime));
+
+
+                glm::vec3 pos = cube->GetPosition();
+                pos.y = floorY + 0.5f; // Move the cube to the floor level
+                cube->SetPosition(pos);
+
+                glm::vec3 vel = cube->GetVelocity();
+                vel.y = -vel.y * restitution; // Reverse the y-velocity and apply restitution
+                cube->SetVelocity(vel);
+            }
+        }
+
         //check each pair of cube for collision
         for (int i = 0; i < cubeList.size(); i++) {
 
@@ -288,103 +306,63 @@ int main()
                     continue;
                 }
 
-                std::pair<bool, std::pair<glm::vec3, float>> result = areCubesColliding(*cubeList[i], *cubeList[j]);
+                result = areCubesColliding(*cubeList[i], *cubeList[j]);
                 if (result.first)
                 {
+                    collidingCubes.insert(std::make_pair(cubeList[i], cubeList[j]));
+
+
+                }
+
+
+                for (const auto& pair : collidingCubes) {
+                    Cube* cube1 = pair.first;
+                    Cube* cube2 = pair.second;
                     //get minimum translation vector and magnitude
                     glm::vec3 mtv = result.second.first;
                     float mtvMagnitude = result.second.second;
 
-                    //std::cout << "MTV: " << glm::to_string(mtv) << " Magnitude: " << mtvMagnitude << std::endl;
-                    //print face normals of cube1
+                    //face normals of cube1
                     std::vector<glm::vec3> normals1 = cubeList[i]->GetFaceNormals();
-                    //std::cout << "Cube1 Face Normals: " << std::endl;
-                    for (glm::vec3& normal : normals1) {
-                        //std::cout << glm::to_string(normal) << std::endl;
-                    }
-
-                    //print face normals of cube2
+                    //face normals of cube2
                     std::vector<glm::vec3> normals2 = cubeList[j]->GetFaceNormals();
-                    //std::cout << "Cube2 Face Normals: " << std::endl;
-                    for (glm::vec3& normal : normals2) {
-                        //std::cout << glm::to_string(normal) << std::endl;
-                    }
+
                     //check collision type
                     int collisionType = detectCollisionType(*cubeList[i], *cubeList[j], mtv, mtvMagnitude);
-                    //std::cout << "collition type: " << collisionType << std::endl;
                     //print collision type
-                    if (collisionType == 1) {
-                        std::cout << "Face-Vertex Collision" << std::endl;
-                    }
-                    else if (collisionType == 2) {
-                        std::cout << "Edge-Edge Collision" << std::endl;
-                    }
+
                     //get contact point
                     glm::vec3 contactPoint = getContactPoint(*cubeList[i], *cubeList[j], collisionType, mtv, mtvMagnitude);
-                    cubeList[i]->SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
-                    cubeList[j]->SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
 
-                    // Collision resolution
+                    // Collision resolution 1
 
                     float totalMass = cubeList[i]->GetMass() + cubeList[j]->GetMass();
                     cubeList[i]->SetPosition(cubeList[i]->GetPosition() + mtv * (mtvMagnitude * (cubeList[j]->GetMass() / totalMass)));
                     cubeList[j]->SetPosition(cubeList[j]->GetPosition() - mtv * (mtvMagnitude * (cubeList[i]->GetMass() / totalMass)));
 
                     // Impulse resolution
-                    float restitution = 0.5f; // Coefficient of restitution - change this to suit your needs
                     glm::vec3 relativeVelocity = cubeList[i]->GetVelocity() - cubeList[j]->GetVelocity();
                     float impulseMagnitude = -(1 + restitution) * glm::dot(relativeVelocity, mtv) / (1 / cubeList[i]->GetMass() + 1 / cubeList[j]->GetMass());
                     glm::vec3 impulse = impulseMagnitude * mtv;
 
 
-                    //cubeList[i]->SetVelocity(cubeList[i]->GetVelocity() + impulse / cubeList[i]->GetMass());
-                    //cubeList[j]->SetVelocity(cubeList[j]->GetVelocity() - impulse / cubeList[j]->GetMass());
+                    cubeList[i]->SetVelocity(cubeList[i]->GetVelocity() + impulse / cubeList[i]->GetMass());
+                    cubeList[j]->SetVelocity(cubeList[j]->GetVelocity() - impulse / cubeList[j]->GetMass());
 
-                    //// Torque and angular velocity adjustment
+                    // Torque and angular velocity adjustment
 
-                    //glm::vec3 r1 = contactPoint - cubeList[i]->GetPosition();
-                    //glm::vec3 r2 = contactPoint - cubeList[j]->GetPosition();
+                    glm::vec3 r1 = contactPoint - cubeList[i]->GetPosition();
+                    glm::vec3 r2 = contactPoint - cubeList[j]->GetPosition();
 
-                    //glm::vec3 torque1 = glm::cross(r1, impulse) * 10.0f;
-                    //glm::vec3 torque2 = glm::cross(r2, -impulse) * 10.0f;
 
-                    //cubeList[i]->SetAngularVelocity(cubeList[i]->GetAngularVelocity() + torque1);
-                    //cubeList[j]->SetAngularVelocity(cubeList[j]->GetAngularVelocity() + torque2);
+                    glm::vec3 angularImpulse = glm::cross(r1, impulse) / cubeList[i]->GetInertia() + glm::cross(r2, -impulse) / cubeList[j]->GetInertia();
 
-                     //Collision resolution
-                     //resolve tunnelling
-
-                    float totalMass = cubeList[i]->GetMass() + cubeList[j]->GetMass();
-                    cubeList[i]->SetPosition(cubeList[i]->GetPosition() + mtv * (mtvMagnitude * (cubeList[i]->GetMass() / totalMass)));
-                    cubeList[j]->SetPosition(cubeList[j]->GetPosition() - mtv * (mtvMagnitude * (cubeList[j]->GetMass() / totalMass)));
-
-                    glm::vec3 Vab = cubeList[i]->GetVelocity() - cubeList[j]->GetVelocity();
-
-                    glm::vec3 Rap = contactPoint - cubeList[i]->GetPosition();
-                    float Ma = cubeList[i]->GetMass();
-                    glm::mat3x3 Ia = cubeList[i]->GetInertia();
-
-                    glm::vec3 Rbp = contactPoint - cubeList[j]->GetPosition();
-                    float Mb = cubeList[j]->GetMass();
-                    glm::mat3x3 Ib = cubeList[j]->GetInertia();
-
-                    float restitution = 1.0f;
-                    glm::vec3 impulse = glm::vec3(-(1.0f + restitution) * glm::dot(Vab, mtv) / (1.0f / Ma + 1.0f / Mb + glm::dot(glm::cross(Ia * glm::cross(Rap, mtv), Rap) + glm::cross(Ib * glm::cross(Rbp, mtv), Rbp), mtv)));
-
-                    cubeList[i]->SetVelocity(cubeList[i]->GetVelocity() + impulse / Ma);
-                    cubeList[j]->SetVelocity(cubeList[j]->GetVelocity() - impulse / Mb);
-                    cubeList[i]->SetAngularVelocity(cubeList[i]->GetAngularVelocity() + Ia * glm::cross(Rap, impulse));
-                    cubeList[j]->SetAngularVelocity(cubeList[j]->GetAngularVelocity() - Ib * glm::cross(Rbp, impulse));
-
-                }
-                else
-                {
-                    cubeList[i]->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
-                    cubeList[j]->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+                    cubeList[i]->SetAngularVelocity(cubeList[i]->GetAngularVelocity() + angularImpulse);
+                    cubeList[j]->SetAngularVelocity(cubeList[j]->GetAngularVelocity() - angularImpulse);
                 }
             }
         }
-
+        collidingCubes.clear();
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
@@ -392,11 +370,11 @@ int main()
 
 
         // Frame limiting
-        float frameEnd = glfwGetTime();
-        float frameTime = frameEnd - frameStart; // Time taken for this frame
+        double frameEnd = glfwGetTime();
+        double frameTime = frameEnd - frameStart; // Time taken for this frame
         if (frameTime < desiredFrameTime)
         {
-            float timeToSleep = desiredFrameTime - frameTime; // Remaining time to reach desired frame time
+            double timeToSleep = desiredFrameTime - frameTime; // Remaining time to reach desired frame time
             int timeToSleepInMs = static_cast<int>(timeToSleep * 1000);
             std::this_thread::sleep_for(std::chrono::milliseconds(timeToSleepInMs)); // Sleep for the remaining time
         }
@@ -440,6 +418,12 @@ void processInput(GLFWwindow* window)
         // The right mouse button was just clicked
         Cube* newCube = new Cube();
         newCube->SetPosition(camera.Position);
+
+        // Set the cube's velocity to make it move in the direction the camera is facing
+        float initialSpeed = 8.0f; // Change this to the speed you want
+        newCube->SetVelocity(initialSpeed * camera.Front);
+        newCube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+        newCube->SetAngularVelocity(glm::vec3(60.0f, 61.0f, 0.0f)); // Change this to the angular velocity you want
         cubeList.push_back(newCube);
     }
 

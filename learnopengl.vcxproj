@@ -138,6 +138,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="collision\resolve.cpp" />
     <ClCompile Include="collision\sat.cpp" />
     <ClCompile Include="physics\check_collision.cpp" />
     <ClCompile Include="src\main.cpp" />

@@ -3,7 +3,7 @@
 #include <vector>
 
 
-Cube::Cube() : position(0.0f, 0.0f, 0.0f), velocity(0.0f, 0.0f, 0.0f), color(0.0f, 1.0f, 0.0f), mass(1.0f), angularVelocity(0.0f,0.0f,0.0f), scale(1.0f,1.0f,1.0f){
+Cube::Cube() : position(0.0f, 0.0f, 0.0f), velocity(0.0f, 0.0f, 0.0f), color(0.0f, 1.0f, 0.0f), mass(5.0f), angularVelocity(0.0f,0.0f,0.0f), scale(1.0f,1.0f,1.0f){
     float vertices[] = {
            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
             0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
