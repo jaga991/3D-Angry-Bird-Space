@@ -10,6 +10,7 @@ class Cube {
 
 
 public:
+
     Cube();
     void Draw(Shader& shader);
     void SetPosition(glm::vec3 newPosition);

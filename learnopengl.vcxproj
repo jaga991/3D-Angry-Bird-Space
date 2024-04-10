@@ -143,6 +143,7 @@
     <ClCompile Include="physics\check_collision.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Cube.cpp" />
+    <ClCompile Include="src\octree.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="collision\sat.h" />

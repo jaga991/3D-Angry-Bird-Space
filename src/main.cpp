@@ -43,6 +43,8 @@ float gravity = -2.0f; // Acceleration due to gravity - change this to suit your
 float friction = 0.5f; // Coefficient of friction - change this to suit your needs
 float airResistance = 0.1f; // Coefficient of air resistance - change this to suit your needs
 
+int frameCounter = 0;
+double startSecond = glfwGetTime();
 
 
 float floorVertices[] = {
@@ -66,7 +68,7 @@ std::vector<Cube*> cubeList;
 
 
 //frame rate
-const float desiredFrameTime = 1.0f / 120.0; // 60 FPS
+const float desiredFrameTime = 1.0f / 200.0; // 60 FPS
 
 
 struct pair_comparator {
@@ -118,6 +120,14 @@ int main()
     }
     glEnable(GL_DEPTH_TEST);
 
+
+
+
+    //START OF THE GAME
+    //level loader
+    //texture loading
+    //Score display
+
     // build and compile our shader zprogram
     // ------------------------------------
     Shader ourShader("Linking\\shader\\shader.vs", "Linking\\shader\\shader.fs");
@@ -142,7 +152,8 @@ int main()
 
 
 
-    for (int i = 0; i < 4; i++) {
+ 
+    for (int i = 0; i < 2; i++) {
 
         float x = 0.0f + 1.0f * i;
         Cube* cube = new Cube();
@@ -153,6 +164,29 @@ int main()
         cubeList.push_back(cube);
     }
 
+    for (int i = 0; i < 2; i++) {
+
+        float x = 0.0f + 1.0f * i;
+        Cube* cube = new Cube();
+        cube->SetPosition(glm::vec3(1.0f, x, 0.0f));
+        cube->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+        cube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+        cube->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+        cubeList.push_back(cube);
+    }
+
+    for (int i = 0; i < 2; i++) {
+
+        float x = 0.0f + 1.0f * i;
+        Cube* cube = new Cube();
+        cube->SetPosition(glm::vec3(1.0f, x, 1.0f));
+        cube->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+        cube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+        cube->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+        cubeList.push_back(cube);
+    }
+
+    // load game level (cube position and property, texture, etc....)
     unsigned int texture1, texture2;
     // texture 1
     // ---------
@@ -254,6 +288,22 @@ int main()
 
         //draw floor
         //glDrawArrays(GL_TRIANGLES, 0, 6);
+        frameCounter++;
+
+
+        // Increment the frame counter
+        frameCounter++;
+
+        // If a second has passed
+        if (glfwGetTime() - startSecond >= 1.0)
+        {
+            // Print the number of frames rendered in this second
+            std::cout << "FPS: " << frameCounter << std::endl;
+
+            // Reset the counters
+            frameCounter = 0;
+            startSecond = glfwGetTime();
+        }
 
         std::pair<bool, std::pair<glm::vec3, float>> result;
 
@@ -302,7 +352,7 @@ int main()
             for (int j = i + 1; j < cubeList.size(); j++)
             {
                 //if distance of cube center is more than 3, skip the collision check
-                if (glm::distance(cubeList[i]->GetPosition(), cubeList[j]->GetPosition()) > 3.0f) {
+                if (glm::distance(cubeList[i]->GetPosition(), cubeList[j]->GetPosition()) > 2.85f) {
                     continue;
                 }
 
