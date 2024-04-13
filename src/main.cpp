@@ -41,10 +41,9 @@ bool wasRightMouseButtonPressed = false;
 
 
 //physics constants
-float restitution = 0.5f; // Coefficient of restitution - change this to suit your needs
 float gravity = -0.0f; // Acceleration due to gravity - change this to suit your needs
 float friction = 0.5f; // Coefficient of friction - change this to suit your needs
-float airResistance = 0.2f; // Coefficient of air resistance - change this to suit your needs
+float airResistance = 0.1f; // Coefficient of air resistance - change this to suit your needs
 
 int frameCounter = 0;
 double startSecond = glfwGetTime();
@@ -294,7 +293,7 @@ int main()
                 cube->SetPosition(pos);
 
                 glm::vec3 vel = cube->GetVelocity();
-                vel.y = -vel.y * restitution; // Reverse the y-velocity and apply restitution
+                vel.y = -vel.y * cube->GetRestitution(); // Reverse the y-velocity and apply restitution
                 cube->SetVelocity(vel);
             }
         }
@@ -345,7 +344,7 @@ int main()
 
                     // Impulse resolution
                     glm::vec3 relativeVelocity = cubeList[i]->GetVelocity() - cubeList[j]->GetVelocity();
-                    float impulseMagnitude = -(1 + restitution) * glm::dot(relativeVelocity, mtv) / (1 / cubeList[i]->GetMass() + 1 / cubeList[j]->GetMass());
+                    float impulseMagnitude = -(1 + ((cubeList[i]->GetRestitution() + cubeList[j]->GetRestitution())/2)) * glm::dot(relativeVelocity, mtv) / (1 / cubeList[i]->GetMass() + 1 / cubeList[j]->GetMass());
                     glm::vec3 impulse = impulseMagnitude * mtv;
 
 

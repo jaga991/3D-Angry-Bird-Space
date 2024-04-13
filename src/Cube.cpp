@@ -3,7 +3,7 @@
 #include <vector>
 
 
-Cube::Cube() : position(0.0f, 0.0f, 0.0f), velocity(0.0f, 0.0f, 0.0f), color(0.0f, 1.0f, 0.0f), mass(20.0f), angularVelocity(0.0f,0.0f,0.0f), scale(1.0f,1.0f,1.0f){
+Cube::Cube() : position(0.0f, 0.0f, 0.0f), velocity(0.0f, 0.0f, 0.0f), color(0.0f, 1.0f, 0.0f), mass(20.0f), angularVelocity(0.0f,0.0f,0.0f), scale(1.0f,1.0f,1.0f), restitution(0.5f){
     float vertices[] = {
            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
             0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -192,6 +192,9 @@ void Cube::SetScale(const glm::vec3& scaleIn) {
     scale = scaleIn;
 }
 
+void Cube::SetRestitution(float restitutionIn) {
+	restitution = restitutionIn;
+}
 // Add a method to get the scale
 glm::vec3 Cube::GetScale() const {
     return scale;
@@ -226,9 +229,14 @@ glm::mat3x3 Cube::GetInertia()
     return inertia;
 }
 
+float Cube::GetRestitution() {
+	return restitution;
+}
+
 void Cube::deleteBuffers() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
 }
+
 
 

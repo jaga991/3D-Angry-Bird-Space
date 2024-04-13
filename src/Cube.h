@@ -23,6 +23,9 @@ public:
     void SetMass(float massIn);
 	void SetInertia(const glm::mat3x3& inertiaIn);
     
+    void SetRestitution(float restitutionIn);
+    
+    float GetRestitution();
     float GetMass();
     glm::vec3 GetRotation();
     glm::mat3x3 GetInertia();
@@ -47,4 +50,5 @@ private:
     glm::vec3 angularVelocity;
     glm::vec3 scale;
     float mass;
+    float restitution;
 };
