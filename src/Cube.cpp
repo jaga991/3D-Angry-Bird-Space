@@ -79,6 +79,11 @@ void Cube::Draw(Shader& shader) {
     shader.setMat4("model", model);
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
+    GLenum error = glGetError();
+    if (error != GL_NO_ERROR)
+    {
+        std::cout << "OpenGL error: " << error << std::endl;
+    }
 }
 
 std::vector<glm::vec3> Cube::GetVertices() const {

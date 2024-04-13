@@ -1,10 +1,8 @@
-#include <thread>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <cstdlib> // for std::rand and std::srand
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/string_cast.hpp>
@@ -21,7 +19,11 @@
 #include <vector>
 
 #include "../collision/sat.h"
+
 #include <set>
+#include <tuple>
+
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
@@ -37,11 +39,12 @@ float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 bool wasRightMouseButtonPressed = false;
 
+
 //physics constants
 float restitution = 0.5f; // Coefficient of restitution - change this to suit your needs
-float gravity = -2.0f; // Acceleration due to gravity - change this to suit your needs
+float gravity = -0.0f; // Acceleration due to gravity - change this to suit your needs
 float friction = 0.5f; // Coefficient of friction - change this to suit your needs
-float airResistance = 0.1f; // Coefficient of air resistance - change this to suit your needs
+float airResistance = 0.2f; // Coefficient of air resistance - change this to suit your needs
 
 int frameCounter = 0;
 double startSecond = glfwGetTime();
@@ -63,13 +66,10 @@ float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
 
-//store a list of cubes
 std::vector<Cube*> cubeList;
-
 
 //frame rate
 const float desiredFrameTime = 1.0f / 200.0; // 60 FPS
-
 
 struct pair_comparator {
     bool operator() (const std::pair<Cube*, Cube*>& a, const std::pair<Cube*, Cube*>& b) const {
@@ -82,6 +82,7 @@ struct pair_comparator {
         return std::tie(a1, a2) < std::tie(b1, b2);
     }
 };
+
 
 
 int main()
@@ -120,14 +121,6 @@ int main()
     }
     glEnable(GL_DEPTH_TEST);
 
-
-
-
-    //START OF THE GAME
-    //level loader
-    //texture loading
-    //Score display
-
     // build and compile our shader zprogram
     // ------------------------------------
     Shader ourShader("Linking\\shader\\shader.vs", "Linking\\shader\\shader.fs");
@@ -152,8 +145,7 @@ int main()
 
 
 
- 
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 4; i++) {
 
         float x = 0.0f + 1.0f * i;
         Cube* cube = new Cube();
@@ -164,29 +156,6 @@ int main()
         cubeList.push_back(cube);
     }
 
-    for (int i = 0; i < 2; i++) {
-
-        float x = 0.0f + 1.0f * i;
-        Cube* cube = new Cube();
-        cube->SetPosition(glm::vec3(1.0f, x, 0.0f));
-        cube->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
-        cube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
-        cube->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
-        cubeList.push_back(cube);
-    }
-
-    for (int i = 0; i < 2; i++) {
-
-        float x = 0.0f + 1.0f * i;
-        Cube* cube = new Cube();
-        cube->SetPosition(glm::vec3(1.0f, x, 1.0f));
-        cube->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
-        cube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
-        cube->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
-        cubeList.push_back(cube);
-    }
-
-    // load game level (cube position and property, texture, etc....)
     unsigned int texture1, texture2;
     // texture 1
     // ---------
@@ -288,22 +257,6 @@ int main()
 
         //draw floor
         //glDrawArrays(GL_TRIANGLES, 0, 6);
-        frameCounter++;
-
-
-        // Increment the frame counter
-        frameCounter++;
-
-        // If a second has passed
-        if (glfwGetTime() - startSecond >= 1.0)
-        {
-            // Print the number of frames rendered in this second
-            std::cout << "FPS: " << frameCounter << std::endl;
-
-            // Reset the counters
-            frameCounter = 0;
-            startSecond = glfwGetTime();
-        }
 
         std::pair<bool, std::pair<glm::vec3, float>> result;
 
@@ -352,7 +305,7 @@ int main()
             for (int j = i + 1; j < cubeList.size(); j++)
             {
                 //if distance of cube center is more than 3, skip the collision check
-                if (glm::distance(cubeList[i]->GetPosition(), cubeList[j]->GetPosition()) > 2.85f) {
+                if (glm::distance(cubeList[i]->GetPosition(), cubeList[j]->GetPosition()) > 3.0f) {
                     continue;
                 }
 
@@ -418,16 +371,6 @@ int main()
         glfwSwapBuffers(window);
         glfwPollEvents();
 
-
-        // Frame limiting
-        double frameEnd = glfwGetTime();
-        double frameTime = frameEnd - frameStart; // Time taken for this frame
-        if (frameTime < desiredFrameTime)
-        {
-            double timeToSleep = desiredFrameTime - frameTime; // Remaining time to reach desired frame time
-            int timeToSleepInMs = static_cast<int>(timeToSleep * 1000);
-            std::this_thread::sleep_for(std::chrono::milliseconds(timeToSleepInMs)); // Sleep for the remaining time
-        }
     }
 
     // optional: de-allocate all resources once they've outlived their purpose:
@@ -445,86 +388,87 @@ int main()
     return 0;
 }
 
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow* window)
-{
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.ProcessKeyboard(FORWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.ProcessKeyboard(LEFT, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.ProcessKeyboard(RIGHT, deltaTime);
-
-    bool isRightMouseButtonPressed = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
-
-    if (!wasRightMouseButtonPressed && isRightMouseButtonPressed)
+    // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
+    // ---------------------------------------------------------------------------------------------------------
+    void processInput(GLFWwindow * window)
     {
-        // The right mouse button was just clicked
-        Cube* newCube = new Cube();
-        newCube->SetPosition(camera.Position);
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+            glfwSetWindowShouldClose(window, true);
 
-        // Set the cube's velocity to make it move in the direction the camera is facing
-        float initialSpeed = 8.0f; // Change this to the speed you want
-        newCube->SetVelocity(initialSpeed * camera.Front);
-        newCube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
-        newCube->SetAngularVelocity(glm::vec3(60.0f, 61.0f, 0.0f)); // Change this to the angular velocity you want
-        cubeList.push_back(newCube);
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            camera.ProcessKeyboard(FORWARD, deltaTime);
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            camera.ProcessKeyboard(BACKWARD, deltaTime);
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+            camera.ProcessKeyboard(LEFT, deltaTime);
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            camera.ProcessKeyboard(RIGHT, deltaTime);
+
+        bool isRightMouseButtonPressed = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
+
+        if (!wasRightMouseButtonPressed && isRightMouseButtonPressed)
+        {
+            // The right mouse button was just clicked
+            Cube* newCube = new Cube();
+
+            newCube->SetPosition(camera.Position);
+
+            // Set the cube's velocity to make it move in the direction the camera is facing
+            float initialSpeed = 5.0f; // Change this to the speed you want
+            newCube->SetVelocity(initialSpeed * camera.Front);
+            newCube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+            newCube->SetAngularVelocity(glm::vec3(60.0f, 61.0f, 0.0f)); // Change this to the angular velocity you want
+            cubeList.push_back(newCube);
+        }
+
+        wasRightMouseButtonPressed = isRightMouseButtonPressed;
     }
 
-    wasRightMouseButtonPressed = isRightMouseButtonPressed;
-}
-
-void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
-{
-    float xpos = static_cast<float>(xposIn);
-    float ypos = static_cast<float>(yposIn);
-
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+    void mouse_callback(GLFWwindow * window, double xposIn, double yposIn)
     {
         float xpos = static_cast<float>(xposIn);
         float ypos = static_cast<float>(yposIn);
 
-        if (firstMouse)
+        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
         {
+            float xpos = static_cast<float>(xposIn);
+            float ypos = static_cast<float>(yposIn);
+
+            if (firstMouse)
+            {
+                lastX = xpos;
+                lastY = ypos;
+                firstMouse = false;
+            }
+
+            float xoffset = xpos - lastX;
+            float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
             lastX = xpos;
             lastY = ypos;
-            firstMouse = false;
+
+            camera.ProcessMouseMovement(xoffset, yoffset);
+        }
+        else
+        {
+            firstMouse = true;
         }
 
-        float xoffset = xpos - lastX;
-        float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-        lastX = xpos;
-        lastY = ypos;
 
-        camera.ProcessMouseMovement(xoffset, yoffset);
     }
-    else
+
+    // glfw: whenever the mouse scroll wheel scrolls, this callback is called
+    // ----------------------------------------------------------------------
+    void scroll_callback(GLFWwindow * window, double xoffset, double yoffset)
     {
-        firstMouse = true;
+        camera.ProcessMouseScroll(static_cast<float>(yoffset));
+
     }
 
-
-}
-
-// glfw: whenever the mouse scroll wheel scrolls, this callback is called
-// ----------------------------------------------------------------------
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-    camera.ProcessMouseScroll(static_cast<float>(yoffset));
-
-}
-
-// glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    // make sure the viewport matches the new window dimensions; note that width and 
-    // height will be significantly larger than specified on retina displays.
-    glViewport(0, 0, width, height);
-}
+    // glfw: whenever the window size changed (by OS or user resize) this callback function executes
+    // ---------------------------------------------------------------------------------------------
+    void framebuffer_size_callback(GLFWwindow * window, int width, int height)
+    {
+        // make sure the viewport matches the new window dimensions; note that width and 
+        // height will be significantly larger than specified on retina displays.
+        glViewport(0, 0, width, height);
+    }
