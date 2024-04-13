@@ -30,6 +30,18 @@
     <ClCompile Include="collision\sat.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+<<<<<<< Updated upstream
+=======
+    <ClCompile Include="collision\resolve.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\octree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="level\level.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+>>>>>>> Stashed changes
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\shader_s.h">
@@ -42,6 +54,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="collision\sat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="level\level.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -139,13 +139,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="collision\sat.cpp" />
+<<<<<<< Updated upstream
     <ClCompile Include="Linking\shape\cube.cpp" />
+=======
+    <ClCompile Include="level\level.cpp" />
+>>>>>>> Stashed changes
     <ClCompile Include="physics\check_collision.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Cube.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="collision\sat.h" />
+    <ClInclude Include="level\level.h" />
     <ClInclude Include="src\camera.h" />
     <ClInclude Include="src\Cube.h" />
     <ClInclude Include="src\shader_s.h" />

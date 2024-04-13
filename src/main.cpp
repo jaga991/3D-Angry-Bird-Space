@@ -19,6 +19,12 @@
 #include <vector>
 
 #include "../collision/sat.h"
+<<<<<<< Updated upstream
+=======
+#include <set>
+
+#include "../level/level.h"
+>>>>>>> Stashed changes
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
@@ -34,6 +40,18 @@ float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 bool wasRightMouseButtonPressed = false;
 
+<<<<<<< Updated upstream
+=======
+//physics constants
+float restitution = 0.5f; // Coefficient of restitution - change this to suit your needs
+float gravity = -0.0f; // Acceleration due to gravity - change this to suit your needs
+float friction = 0.5f; // Coefficient of friction - change this to suit your needs
+float airResistance = 0.2f; // Coefficient of air resistance - change this to suit your needs
+
+int frameCounter = 0;
+double startSecond = glfwGetTime();
+
+>>>>>>> Stashed changes
 
 float floorVertices[] = {
     // positions          // texture Coords 
@@ -51,10 +69,17 @@ float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
 
+<<<<<<< Updated upstream
 //store a list of cubes
 std::vector<Cube> cubes;
 
 
+=======
+std::vector<Cube*> cubeList;
+
+//frame rate
+const float desiredFrameTime = 1.0f / 200.0; // 60 FPS
+>>>>>>> Stashed changes
 
 
 
@@ -98,6 +123,9 @@ int main()
     // build and compile our shader zprogram
     // ------------------------------------
     Shader ourShader("Linking\\shader\\shader.vs", "Linking\\shader\\shader.fs");
+    //Shader birdShader
+    //Shader pigShader
+    //Shader obstacleShader
 
     unsigned int floorVAO, floorVBO;
     glGenVertexArrays(1, &floorVAO);
@@ -120,12 +148,41 @@ int main()
     cube1.SetPosition(glm::vec3(1.2f, 1.2f, 1.2f));
     cube1.SetRotation(glm::vec3(45.0f, 0.0f, 0.0f)); // Rotate 45 degrees around the x-axis
 
+<<<<<<< Updated upstream
     cubes.push_back(cube1);
 
     Cube cube2;
     cube2.SetPosition(glm::vec3(0.0f, 0.0, 0.0f));
     cubes.push_back(cube2);
 
+=======
+    //first level
+ 
+  //  for (int i = 0; i < 4; i++) {
+  //      
+  //      float x = 0.0f + 1.2f * i;
+  //      Cube* cube = new Cube();
+
+  //      if (i == 2) {
+  //          cube->SetScale(glm::vec3(2.0f, 1.0f, 1.0f));
+  //      }
+
+  //      if (i == 3) {
+  //          cube->SetColor(glm::vec3(5.0f, 5.0f, 5.0f));
+		//}
+  //      cube->SetPosition(glm::vec3(0.0f, x, 0.0f));
+  //      cube->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+  //      cube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+  //      cube->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+  //      cubeList.push_back(cube);
+  //  }
+
+    //second level
+
+    cubeList = loadLevel(1);
+
+    // load game level (cube position and property, texture, etc....)
+>>>>>>> Stashed changes
     unsigned int texture1, texture2;
     // texture 1
     // ---------
@@ -229,11 +286,61 @@ int main()
         
         for (int i = 0; i < cubes.size(); i++)
         {
+<<<<<<< Updated upstream
             // Draw the cube
             cubes[i].Draw(ourShader);
             //make cube 1 move
             if (i == 0) { // Assuming cube1 is the first cube in the vector
                 cubes[i].SetPosition(cubes[i].GetPosition() + glm::vec3(-0.00001f,-0.00001f,-0.00001f));
+=======
+            // Print the number of frames rendered in this second
+            std::cout << "FPS: " << frameCounter << std::endl;
+
+            // Reset the counters
+            frameCounter = 0;
+            startSecond = glfwGetTime();
+        }
+
+        std::pair<bool, std::pair<glm::vec3, float>> result;
+
+        for (int i = 0; i < cubeList.size(); i++)
+        {
+            //apply gravity
+            cubeList[i]->SetVelocity(cubeList[i]->GetVelocity() + glm::vec3(0.0f, gravity, 0.0f) * deltaTime);
+
+            //apply air resistance
+            cubeList[i]->SetVelocity(cubeList[i]->GetVelocity() * (1.0f - airResistance * deltaTime));
+            cubeList[i]->SetAngularVelocity(cubeList[i]->GetAngularVelocity() * (1.0f - (airResistance)* deltaTime));
+
+            // Update the position and rotation of the cube
+            cubeList[i]->SetPosition(cubeList[i]->GetPosition() + cubeList[i]->GetVelocity() * deltaTime);
+            cubeList[i]->SetRotation(cubeList[i]->GetRotation() + cubeList[i]->GetAngularVelocity() * deltaTime);
+
+
+            // Draw the cube
+            cubeList[i]->Draw(ourShader);
+        }
+
+        //floor collision checker
+        for (Cube* cube : cubeList) {
+
+            float floorY = -0.5f; // The y-coordinate of the floor
+
+            if (cube->GetPosition().y - 0.5f < floorY) { // If the cube is below the floor
+
+                //apply friction
+                cube->SetVelocity(cube->GetVelocity() * (1.0f - friction * deltaTime));
+                cube->SetAngularVelocity(cube->GetAngularVelocity() * (1.0f - friction * deltaTime));
+
+
+                glm::vec3 pos = cube->GetPosition();
+                pos.y = floorY + 0.5f; // Move the cube to the floor level
+                cube->SetPosition(pos);
+
+                glm::vec3 vel = cube->GetVelocity();
+                vel.y = -vel.y * restitution; // Reverse the y-velocity and apply restitution
+                cube->SetVelocity(vel);
+>>>>>>> Stashed changes
             }
 
                
@@ -243,6 +350,76 @@ int main()
             cubes[0].SetColor(glm::vec3(1.0f, 0.0f, 0.0f)); // Change the color to red
             cubes[1].SetColor(glm::vec3(1.0f, 0.0f, 0.0f)); // Change the color to red
 
+<<<<<<< Updated upstream
+=======
+            for (int j = i + 1; j < cubeList.size(); j++)
+            {
+                //if distance of cube center is more than 3, skip the collision check
+                if (glm::distance(cubeList[i]->GetPosition(), cubeList[j]->GetPosition()) > 2.85f) {
+                    continue;
+                }
+
+                result = areCubesColliding(*cubeList[i], *cubeList[j]);
+                if (result.first)
+                {
+                    collidingCubes.insert(std::make_pair(cubeList[i], cubeList[j]));
+
+
+                }
+
+
+                for (const auto& pair : collidingCubes) {
+                    Cube* cube1 = pair.first;
+                    Cube* cube2 = pair.second;
+                    //get minimum translation vector and magnitude
+                    glm::vec3 mtv = result.second.first;
+                    float mtvMagnitude = result.second.second;
+
+                    //face normals of cube1
+                    std::vector<glm::vec3> normals1 = cubeList[i]->GetFaceNormals();
+                    //face normals of cube2
+                    std::vector<glm::vec3> normals2 = cubeList[j]->GetFaceNormals();
+
+                    //check collision type
+                    int collisionType = detectCollisionType(*cubeList[i], *cubeList[j], mtv, mtvMagnitude);
+                    //print collision type
+
+                    //get contact point
+                    glm::vec3 contactPoint = getContactPoint(*cubeList[i], *cubeList[j], collisionType, mtv, mtvMagnitude);
+
+                    // Collision resolution 1
+
+
+
+                    //resolve tunnelling first
+                    float totalMass = cubeList[i]->GetMass() + cubeList[j]->GetMass();
+                    cubeList[i]->SetPosition(cubeList[i]->GetPosition() +  mtv * (mtvMagnitude * (cubeList[j]->GetMass() / totalMass)));
+                    cubeList[j]->SetPosition(cubeList[j]->GetPosition() -  mtv * (mtvMagnitude * (cubeList[i]->GetMass() / totalMass)));
+
+                    // Impulse resolution
+                    glm::vec3 relativeVelocity = cubeList[i]->GetVelocity() - cubeList[j]->GetVelocity();
+                    float impulseMagnitude = -(1 + restitution) * glm::dot(relativeVelocity, mtv) / (1 / cubeList[i]->GetMass() + 1 / cubeList[j]->GetMass());
+                    glm::vec3 impulse = impulseMagnitude * mtv;
+
+
+                    cubeList[i]->SetVelocity(cubeList[i]->GetVelocity() +  impulse / cubeList[i]->GetMass());
+                    cubeList[j]->SetVelocity(cubeList[j]->GetVelocity() -  impulse / cubeList[j]->GetMass());
+
+                    // Torque and angular velocity adjustment
+
+                    glm::vec3 r1 = contactPoint - cubeList[i]->GetPosition();
+                    glm::vec3 r2 = contactPoint - cubeList[j]->GetPosition();
+
+
+                    glm::vec3 angularImpulse = glm::cross(r1, impulse) / cubeList[i]->GetInertia() + glm::cross(r2, -impulse) / cubeList[j]->GetInertia();
+
+                    cubeList[i]->SetAngularVelocity(cubeList[i]->GetAngularVelocity() + angularImpulse);
+                    cubeList[j]->SetAngularVelocity(cubeList[j]->GetAngularVelocity() - angularImpulse);
+
+
+                }
+            }
+>>>>>>> Stashed changes
         }
         else {
             cubes[0].SetColor(glm::vec3(0.0f, 1.0f, 0.0f)); // Change the color to red
@@ -253,6 +430,10 @@ int main()
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
         glfwPollEvents();
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
     }
 
     // optional: de-allocate all resources once they've outlived their purpose:
@@ -284,9 +465,21 @@ void processInput(GLFWwindow* window)
     if (!wasRightMouseButtonPressed && isRightMouseButtonPressed)
     {
         // The right mouse button was just clicked
+<<<<<<< Updated upstream
         Cube newCube;
         newCube.SetPosition(camera.Position);
         cubes.push_back(newCube);
+=======
+        Cube* newCube = new Cube();
+        newCube->SetPosition(camera.Position);
+
+        // Set the cube's velocity to make it move in the direction the camera is facing
+        float initialSpeed = 5.0f; // Change this to the speed you want
+        newCube->SetVelocity(initialSpeed * camera.Front);
+        newCube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+        newCube->SetAngularVelocity(glm::vec3(60.0f, 61.0f, 0.0f)); // Change this to the angular velocity you want
+        cubeList.push_back(newCube);
+>>>>>>> Stashed changes
     }
 
     wasRightMouseButtonPressed = isRightMouseButtonPressed;
