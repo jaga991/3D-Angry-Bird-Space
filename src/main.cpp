@@ -145,7 +145,7 @@ int main()
 
 
 
-    cubeList = loadLevel(1);
+    cubeList = loadLevel(2);
 
     unsigned int texture1, texture2;
     // texture 1
@@ -268,27 +268,7 @@ int main()
             cubeList[i]->Draw(ourShader);
         }
 
-        //floor collision checker
-        for (Cube* cube : cubeList) {
 
-            float floorY = -0.5f; // The y-coordinate of the floor
-
-            if (cube->GetPosition().y - 0.5f < floorY) { // If the cube is below the floor
-
-                //apply friction
-                //cube->SetVelocity(cube->GetVelocity() * (1.0f - friction * deltaTime));
-                //cube->SetAngularVelocity(cube->GetAngularVelocity() * (1.0f - friction * deltaTime));
-
-
-                glm::vec3 pos = cube->GetPosition();
-                pos.y = floorY + 0.5f; // Move the cube to the floor level
-                cube->SetPosition(pos);
-
-                glm::vec3 vel = cube->GetVelocity();
-                vel.y = -vel.y * cube->GetRestitution(); // Reverse the y-velocity and apply restitution
-                cube->SetVelocity(vel);
-            }
-        }
 
         //check each pair of cube for collision
         for (int i = 0; i < cubeList.size(); i++) {
