@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "../collision/sat.h"
+#include "../level/level.h"
 
 #include <set>
 #include <tuple>
@@ -64,7 +65,7 @@ float floorVertices[] = {
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
-
+//list of cubes
 std::vector<Cube*> cubeList;
 
 //frame rate
@@ -144,16 +145,7 @@ int main()
 
 
 
-    for (int i = 0; i < 4; i++) {
-
-        float x = 0.0f + 1.0f * i;
-        Cube* cube = new Cube();
-        cube->SetPosition(glm::vec3(0.0f, x, 0.0f));
-        cube->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
-        cube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
-        cube->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
-        cubeList.push_back(cube);
-    }
+    cubeList = loadLevel(1);
 
     unsigned int texture1, texture2;
     // texture 1
