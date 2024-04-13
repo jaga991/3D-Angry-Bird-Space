@@ -66,9 +66,6 @@ void projectCubeOntoAxis(const Cube& cube, const glm::vec3& axis, float& minProj
             maxProj = proj;
         }
     }
-<<<<<<< Updated upstream
-}
-=======
 }
 
 int detectCollisionType(const Cube& cube1, const Cube& cube2, glm::vec3 mtv, float mtvMagnitude) {

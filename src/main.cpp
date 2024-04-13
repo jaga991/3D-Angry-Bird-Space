@@ -19,12 +19,11 @@
 #include <vector>
 
 #include "../collision/sat.h"
-<<<<<<< Updated upstream
-=======
+
 #include <set>
 
 #include "../level/level.h"
->>>>>>> Stashed changes
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
@@ -40,8 +39,7 @@ float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 bool wasRightMouseButtonPressed = false;
 
-<<<<<<< Updated upstream
-=======
+
 //physics constants
 float restitution = 0.5f; // Coefficient of restitution - change this to suit your needs
 float gravity = -0.0f; // Acceleration due to gravity - change this to suit your needs
@@ -51,7 +49,6 @@ float airResistance = 0.2f; // Coefficient of air resistance - change this to su
 int frameCounter = 0;
 double startSecond = glfwGetTime();
 
->>>>>>> Stashed changes
 
 float floorVertices[] = {
     // positions          // texture Coords 
@@ -69,17 +66,14 @@ float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
 
-<<<<<<< Updated upstream
 //store a list of cubes
 std::vector<Cube> cubes;
 
-
-=======
 std::vector<Cube*> cubeList;
 
 //frame rate
 const float desiredFrameTime = 1.0f / 200.0; // 60 FPS
->>>>>>> Stashed changes
+
 
 
 
@@ -141,21 +135,7 @@ int main()
 
 	// load and create a texture
     // -------------------------
-    
 
-
-    Cube cube1;
-    cube1.SetPosition(glm::vec3(1.2f, 1.2f, 1.2f));
-    cube1.SetRotation(glm::vec3(45.0f, 0.0f, 0.0f)); // Rotate 45 degrees around the x-axis
-
-<<<<<<< Updated upstream
-    cubes.push_back(cube1);
-
-    Cube cube2;
-    cube2.SetPosition(glm::vec3(0.0f, 0.0, 0.0f));
-    cubes.push_back(cube2);
-
-=======
     //first level
  
   //  for (int i = 0; i < 4; i++) {
@@ -182,7 +162,7 @@ int main()
     cubeList = loadLevel(1);
 
     // load game level (cube position and property, texture, etc....)
->>>>>>> Stashed changes
+
     unsigned int texture1, texture2;
     // texture 1
     // ---------
@@ -286,13 +266,11 @@ int main()
         
         for (int i = 0; i < cubes.size(); i++)
         {
-<<<<<<< Updated upstream
             // Draw the cube
             cubes[i].Draw(ourShader);
             //make cube 1 move
             if (i == 0) { // Assuming cube1 is the first cube in the vector
                 cubes[i].SetPosition(cubes[i].GetPosition() + glm::vec3(-0.00001f,-0.00001f,-0.00001f));
-=======
             // Print the number of frames rendered in this second
             std::cout << "FPS: " << frameCounter << std::endl;
 
@@ -340,7 +318,6 @@ int main()
                 glm::vec3 vel = cube->GetVelocity();
                 vel.y = -vel.y * restitution; // Reverse the y-velocity and apply restitution
                 cube->SetVelocity(vel);
->>>>>>> Stashed changes
             }
 
                
@@ -350,8 +327,6 @@ int main()
             cubes[0].SetColor(glm::vec3(1.0f, 0.0f, 0.0f)); // Change the color to red
             cubes[1].SetColor(glm::vec3(1.0f, 0.0f, 0.0f)); // Change the color to red
 
-<<<<<<< Updated upstream
-=======
             for (int j = i + 1; j < cubeList.size(); j++)
             {
                 //if distance of cube center is more than 3, skip the collision check
@@ -419,7 +394,6 @@ int main()
 
                 }
             }
->>>>>>> Stashed changes
         }
         else {
             cubes[0].SetColor(glm::vec3(0.0f, 1.0f, 0.0f)); // Change the color to red
@@ -430,10 +404,6 @@ int main()
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
         glfwPollEvents();
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
     }
 
     // optional: de-allocate all resources once they've outlived their purpose:
@@ -465,11 +435,9 @@ void processInput(GLFWwindow* window)
     if (!wasRightMouseButtonPressed && isRightMouseButtonPressed)
     {
         // The right mouse button was just clicked
-<<<<<<< Updated upstream
         Cube newCube;
         newCube.SetPosition(camera.Position);
         cubes.push_back(newCube);
-=======
         Cube* newCube = new Cube();
         newCube->SetPosition(camera.Position);
 
@@ -479,7 +447,6 @@ void processInput(GLFWwindow* window)
         newCube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
         newCube->SetAngularVelocity(glm::vec3(60.0f, 61.0f, 0.0f)); // Change this to the angular velocity you want
         cubeList.push_back(newCube);
->>>>>>> Stashed changes
     }
 
     wasRightMouseButtonPressed = isRightMouseButtonPressed;

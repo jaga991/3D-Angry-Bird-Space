@@ -139,11 +139,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="collision\sat.cpp" />
-<<<<<<< Updated upstream
     <ClCompile Include="Linking\shape\cube.cpp" />
-=======
     <ClCompile Include="level\level.cpp" />
->>>>>>> Stashed changes
+
     <ClCompile Include="physics\check_collision.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Cube.cpp" />
