@@ -1,7 +1,7 @@
 #include "../src/Cube.h"
 #include <cstdlib> // for rand() and srand()
 #include <ctime> // for time()
-std::vector<Cube*> loadLevel(int level, int score) {
+std::vector<Cube*> loadLevel(int level, int &score) {
     std::vector<Cube*> cubeList;
 
     Cube* skyBox = new Cube();
@@ -174,7 +174,7 @@ std::vector<Cube*> loadLevel(int level, int score) {
         }
         //wood
         else if (cubeList[i]->GetType() == 5) {
-			cubeList[i]->SetColor(glm::vec3(0.8f, 0.4f, 0.0f));
+			cubeList[i]->SetColor(glm::vec3(0.565f, 0.933f, 0.565f));
 			cubeList[i]->SetMass(15.0f);
 			cubeList[i]->SetRestitution(0.8f);
 		}
