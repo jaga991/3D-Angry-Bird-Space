@@ -129,9 +129,10 @@ std::vector<Cube*> loadLevel(int level, int score) {
             cubeList.push_back(cube);
         }
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 1; i++) {
             Cube* cube = new Cube();
             cube->SetType(5);
+            cube->SetScale(glm::vec3(2.0f, 2.0f, 2.0f));
             cube->SetPosition(glm::vec3(0.0f + i, 2.0f, 0.0f));
             cube->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
             cube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -174,7 +175,7 @@ std::vector<Cube*> loadLevel(int level, int score) {
         //wood
         else if (cubeList[i]->GetType() == 5) {
 			cubeList[i]->SetColor(glm::vec3(0.8f, 0.4f, 0.0f));
-			cubeList[i]->SetMass(20.0f);
+			cubeList[i]->SetMass(15.0f);
 			cubeList[i]->SetRestitution(0.8f);
 		}
 

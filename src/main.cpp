@@ -466,7 +466,7 @@ void processInput(GLFWwindow* window)
         newCube->SetPosition(camera.Position);
         newCube->SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
         // Set the cube's velocity to make it move in the direction the camera is facing
-        float initialSpeed = 5.0f; // Change this to the speed you want
+        float initialSpeed = 15.0f; // Change this to the speed you want
         newCube->SetVelocity(initialSpeed * camera.Front);
         newCube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
         newCube->SetAngularVelocity(glm::vec3(60.0f, 61.0f, 0.0f)); // Change this to the angular velocity you want
