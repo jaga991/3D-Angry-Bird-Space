@@ -17,7 +17,7 @@ cubeList.push_back(skyBox);
     if (level == 0) {
 		Cube* cube = new Cube();
         cube->SetType(1);
-		cube->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+		cube->SetPosition(glm::vec3(4.0f, 0.0f, 0.0f));
 		cube->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
 		cube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 		cube->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -25,7 +25,7 @@ cubeList.push_back(skyBox);
 
 		Cube* cube2 = new Cube();
         cube2->SetType(2);
-		cube2->SetPosition(glm::vec3(1.0f, 1.0f, 0.0f));
+		cube2->SetPosition(glm::vec3(1.0f, 0.0f, 0.0f));
 		cube2->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
 		cube2->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 		cube2->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -33,7 +33,7 @@ cubeList.push_back(skyBox);
 
 		Cube* cube3 = new Cube();
         cube3->SetType(3);
-		cube3->SetPosition(glm::vec3(2.0f, 2.0f, 0.0f));
+		cube3->SetPosition(glm::vec3(2.0f, 0.0f, 0.0f));
 		cube3->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
 		cube3->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 		cube3->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -41,11 +41,19 @@ cubeList.push_back(skyBox);
 
 		Cube* cube4 = new Cube();
 		cube4->SetType(4);
-		cube4->SetPosition(glm::vec3(0.0f, 3.0f, 0.0f));
+		cube4->SetPosition(glm::vec3(3.0f, 0.0f, 0.0f));
 		cube4->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
 		cube4->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
         cube4->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
         cubeList.push_back(cube4);
+
+        Cube* cube5 = new Cube();
+        cube5->SetType(5);
+        cube5->SetPosition(glm::vec3(4.0f, 0.0f, 0.0f));
+        cube5->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+        cube5->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+        cube5->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+        cubeList.push_back(cube5);
     }
 
     if (level == 1) {

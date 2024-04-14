@@ -109,18 +109,17 @@ int main()
     }
     glEnable(GL_DEPTH_TEST);
 
+    cubeList = loadLevel(0);
+
+
+
     // build and compile our shader zprogram
     // ------------------------------------
     Shader ourShader("Linking\\shader\\shader.vs", "Linking\\shader\\shader.fs");
 
-
-    // load and create a texture
+    // load and create textures
     // -------------------------
-
-
-    cubeList = loadLevel(3);
-
-    unsigned int texture1, texture2, texture3;
+    unsigned int texture1, texture2, texture3, texture4, texture5;
     // texture 1
     // ---------
     glGenTextures(1, &texture1);
@@ -128,13 +127,14 @@ int main()
     // set the texture wrapping parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
     // set texture filtering parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     // load image, create texture and generate mipmaps
     int width, height, nrChannels;
     stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-    unsigned char* data = stbi_load("Linking\\texture\\pig.png", &width, &height, &nrChannels, 0);
+    unsigned char* data = stbi_load("Linking\\texture\\stone.png", &width, &height, &nrChannels, 0);
     if (data)
     {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -142,7 +142,7 @@ int main()
     }
     else
     {
-        std::cout << "Failed to load texture" << std::endl;
+        std::cout << "Failed to load texture 1" << std::endl;
     }
     stbi_image_free(data);
     // texture 2
@@ -153,9 +153,10 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     // set texture filtering parameters
-
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     // load image, create texture and generate mipmaps
-    data = stbi_load("Linking\\texture\\awesomeface.png", &width, &height, &nrChannels, 0);
+    data = stbi_load("Linking\\texture\\bird.png", &width, &height, &nrChannels, 0);
     if (data)
     {
         // note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
@@ -164,19 +165,20 @@ int main()
     }
     else
     {
-        std::cout << "Failed to load texture" << std::endl;
+        std::cout << "Failed to load texture 2" << std::endl;
     }
     stbi_image_free(data);
 
-// texture 3
-// ---------
+    // texture 3 (text3 saved for background)
+    // ---------
     glGenTextures(1, &texture3);
     glBindTexture(GL_TEXTURE_2D, texture3);
     // set the texture wrapping parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     // set texture filtering parameters
-
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     // load image, create texture and generate mipmaps
     data = stbi_load("Linking\\texture\\background.png", &width, &height, &nrChannels, 0);
     if (data)
@@ -187,9 +189,55 @@ int main()
     }
     else
     {
-        std::cout << "Failed to load texture" << std::endl;
+        std::cout << "Failed to load texture 3" << std::endl;
     }
     stbi_image_free(data);
+
+    //texture 4
+    glGenTextures(1, &texture4);
+    glBindTexture(GL_TEXTURE_2D, texture4);
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)  
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // set texture filtering parameters
+    // load image, create texture and generate mipmaps
+    data = stbi_load("Linking\\texture\\pig.png", &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        // note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture 4" << std::endl;
+    }
+    stbi_image_free(data);
+    //texture 5
+    glGenTextures(1, &texture5);
+    glBindTexture(GL_TEXTURE_2D, texture5);
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)  
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // set texture filtering parameters
+    // load image, create texture and generate mipmaps
+    data = stbi_load("Linking\\texture\\wood.png", &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        // note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture 4" << std::endl;
+    }
+    stbi_image_free(data);
+    // load image, create texture and generate mipmaps
 
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     // -------------------------------------------------------------------------------------------
@@ -197,8 +245,9 @@ int main()
     // either set it manually like so:
     glUniform1i(glGetUniformLocation(ourShader.ID, "texture1"), 0);
 
-    std::set<std::pair<Cube*, Cube*>, pair_comparator> collidingCubes;    // render loop
+    std::set<std::pair<Cube*, Cube*>, pair_comparator> collidingCubes;
     // -----------
+
     while (!glfwWindowShouldClose(window))
     {
         //for camera movement
@@ -211,13 +260,10 @@ int main()
 
         //frame rate
         double frameStart = glfwGetTime();
-
-
         // render
         // ------
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         // bind textures on corresponding texture units
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
@@ -225,20 +271,20 @@ int main()
         glBindTexture(GL_TEXTURE_2D, texture2);
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, texture3);
-
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, texture4);
+        glActiveTexture(GL_TEXTURE4);
+        glBindTexture(GL_TEXTURE_2D, texture5);
         ourShader.setInt("texture1", 0);
         ourShader.setInt("texture2", 1);
         ourShader.setInt("texture3", 2);
-
-
-
+        ourShader.setInt("texture4", 3);
+        ourShader.setInt("texture5", 4);
         // activate shader
         ourShader.use();
-
         // pass projection matrix to shader (note that in this case it could change every frame)
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         ourShader.setMat4("projection", projection);
-
         // camera/view transformation
         glm::mat4 view = camera.GetViewMatrix();
         ourShader.setMat4("view", view);
@@ -250,9 +296,6 @@ int main()
 
         for (int i = 0; i < cubeList.size(); i++)
         {
-            //apply gravity
-            cubeList[i]->SetVelocity(cubeList[i]->GetVelocity() + glm::vec3(0.0f, gravity, 0.0f) * deltaTime);
-
             //apply air resistance
             cubeList[i]->SetVelocity(cubeList[i]->GetVelocity() * (1.0f - airResistance * deltaTime));
             cubeList[i]->SetAngularVelocity(cubeList[i]->GetAngularVelocity() * (1.0f - airResistance * deltaTime));
@@ -260,20 +303,10 @@ int main()
             // Update the position and rotation of the cube
             cubeList[i]->SetPosition(cubeList[i]->GetPosition() + cubeList[i]->GetVelocity() * deltaTime);
             cubeList[i]->SetRotation(cubeList[i]->GetRotation() + cubeList[i]->GetAngularVelocity() * deltaTime);
-            if (cubeList[i]->GetType() == 1) {
-                ourShader.setInt("cubeType", cubeList[i]->GetType());
-            }
-            else if (cubeList[i]->GetType() == 2) {
-                ourShader.setInt("cubeType", cubeList[i]->GetType());
-            }
-			else if (cubeList[i]->GetType() == 3) {
-				ourShader.setInt("cubeType", cubeList[i]->GetType());
-			}
-			else {
-				ourShader.setInt("cubeType", cubeList[i]->GetType());
-			}
-            // Draw the cube
+            ourShader.setInt("cubeType", cubeList[i]->GetType());
             cubeList[i]->Draw(ourShader);
+            // Draw the cube
+
         }
 
 
@@ -287,16 +320,11 @@ int main()
                 if (glm::distance(cubeList[i]->GetPosition(), cubeList[j]->GetPosition()) > 3.0f) {
                     continue;
                 }
-
                 result = areCubesColliding(*cubeList[i], *cubeList[j]);
                 if (result.first)
                 {
                     collidingCubes.insert(std::make_pair(cubeList[i], cubeList[j]));
-
-
                 }
-
-
                 for (const auto& pair : collidingCubes) {
                     Cube* cube1 = pair.first;
                     Cube* cube2 = pair.second;
@@ -324,7 +352,7 @@ int main()
 
                     //// Impulse resolution
                     glm::vec3 relativeVelocity = cubeList[i]->GetVelocity() - cubeList[j]->GetVelocity();
-                    float impulseMagnitude = -(1 + ((cubeList[i]->GetRestitution() + cubeList[j]->GetRestitution())/2)) * glm::dot(relativeVelocity, mtv) / (1 / cubeList[i]->GetMass() + 1 / cubeList[j]->GetMass());
+                    float impulseMagnitude = -(1 + ((cubeList[i]->GetRestitution() + cubeList[j]->GetRestitution()) / 2)) * glm::dot(relativeVelocity, mtv) / (1 / cubeList[i]->GetMass() + 1 / cubeList[j]->GetMass());
                     glm::vec3 impulse = impulseMagnitude * mtv * 0.95f;
 
 
@@ -369,87 +397,114 @@ int main()
     return 0;
 }
 
-    // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-    // ---------------------------------------------------------------------------------------------------------
-    void processInput(GLFWwindow * window)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
+// ---------------------------------------------------------------------------------------------------------
+void processInput(GLFWwindow* window)
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.ProcessKeyboard(FORWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.ProcessKeyboard(LEFT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.ProcessKeyboard(RIGHT, deltaTime);
+
+    bool isRightMouseButtonPressed = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
+
+    if (!wasRightMouseButtonPressed && isRightMouseButtonPressed)
     {
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-            glfwSetWindowShouldClose(window, true);
-
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            camera.ProcessKeyboard(FORWARD, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            camera.ProcessKeyboard(BACKWARD, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            camera.ProcessKeyboard(LEFT, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            camera.ProcessKeyboard(RIGHT, deltaTime);
-
-        bool isRightMouseButtonPressed = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
-
-        if (!wasRightMouseButtonPressed && isRightMouseButtonPressed)
-        {
-            // The right mouse button was just clicked
-            Cube* newCube = new Cube();
-
-            newCube->SetPosition(camera.Position);
-
-            // Set the cube's velocity to make it move in the direction the camera is facing
-            float initialSpeed = 5.0f; // Change this to the speed you want
-            newCube->SetVelocity(initialSpeed * camera.Front);
-            newCube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
-            newCube->SetAngularVelocity(glm::vec3(60.0f, 61.0f, 0.0f)); // Change this to the angular velocity you want
-            cubeList.push_back(newCube);
-        }
-
-        wasRightMouseButtonPressed = isRightMouseButtonPressed;
+        // The right mouse button was just clicked
+        Cube* newCube = new Cube();
+        newCube->SetType(2);
+        newCube->SetPosition(camera.Position);
+        newCube->SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
+        // Set the cube's velocity to make it move in the direction the camera is facing
+        float initialSpeed = 5.0f; // Change this to the speed you want
+        newCube->SetVelocity(initialSpeed * camera.Front);
+        newCube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+        newCube->SetAngularVelocity(glm::vec3(60.0f, 61.0f, 0.0f)); // Change this to the angular velocity you want
+        cubeList.push_back(newCube);
     }
 
-    void mouse_callback(GLFWwindow * window, double xposIn, double yposIn)
+    wasRightMouseButtonPressed = isRightMouseButtonPressed;
+}
+
+void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
+{
+    float xpos = static_cast<float>(xposIn);
+    float ypos = static_cast<float>(yposIn);
+
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
     {
         float xpos = static_cast<float>(xposIn);
         float ypos = static_cast<float>(yposIn);
 
-        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+        if (firstMouse)
         {
-            float xpos = static_cast<float>(xposIn);
-            float ypos = static_cast<float>(yposIn);
-
-            if (firstMouse)
-            {
-                lastX = xpos;
-                lastY = ypos;
-                firstMouse = false;
-            }
-
-            float xoffset = xpos - lastX;
-            float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
             lastX = xpos;
             lastY = ypos;
-
-            camera.ProcessMouseMovement(xoffset, yoffset);
-        }
-        else
-        {
-            firstMouse = true;
+            firstMouse = false;
         }
 
+        float xoffset = xpos - lastX;
+        float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+        lastX = xpos;
+        lastY = ypos;
 
+        camera.ProcessMouseMovement(xoffset, yoffset);
     }
-
-    // glfw: whenever the mouse scroll wheel scrolls, this callback is called
-    // ----------------------------------------------------------------------
-    void scroll_callback(GLFWwindow * window, double xoffset, double yoffset)
+    else
     {
-        camera.ProcessMouseScroll(static_cast<float>(yoffset));
-
+        firstMouse = true;
     }
 
-    // glfw: whenever the window size changed (by OS or user resize) this callback function executes
-    // ---------------------------------------------------------------------------------------------
-    void framebuffer_size_callback(GLFWwindow * window, int width, int height)
-    {
-        // make sure the viewport matches the new window dimensions; note that width and 
-        // height will be significantly larger than specified on retina displays.
-        glViewport(0, 0, width, height);
-    }
+
+}
+
+// glfw: whenever the mouse scroll wheel scrolls, this callback is called
+// ----------------------------------------------------------------------
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    camera.ProcessMouseScroll(static_cast<float>(yoffset));
+
+}
+
+// glfw: whenever the window size changed (by OS or user resize) this callback function executes
+// ---------------------------------------------------------------------------------------------
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    // make sure the viewport matches the new window dimensions; note that width and 
+    // height will be significantly larger than specified on retina displays.
+    glViewport(0, 0, width, height);
+}
