@@ -49,7 +49,14 @@ Cube::Cube() : position(0.0f, 0.0f, 0.0f), velocity(0.0f, 0.0f, 0.0f), color(0.0
     };
 
 
-    inertia = glm::mat3x3(0.3f);
+    inertia = glm::mat3x3(1.0f);
+    float Ix = (mass / 12.0f) * (this->GetScale().y * this->GetScale().y + this->GetScale().z * this->GetScale().z);
+    float Iy = (mass / 12.0f) * (this->GetScale().x * this->GetScale().x + this->GetScale().z * this->GetScale().z);
+    float Iz = (mass / 12.0f) * (this->GetScale().x * this->GetScale().x + this->GetScale().y * this->GetScale().y);
+
+    inertia[0][0] = Ix;
+    inertia[1][1] = Iy;
+    inertia[2][2] = Iz;
 
 
     glGenVertexArrays(1, &VAO);

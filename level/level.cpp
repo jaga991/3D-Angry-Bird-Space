@@ -1,18 +1,18 @@
 #include "../src/Cube.h"
 #include <cstdlib> // for rand() and srand()
 #include <ctime> // for time()
-std::vector<Cube*> loadLevel(int level) {
+std::vector<Cube*> loadLevel(int level, int score) {
     std::vector<Cube*> cubeList;
 
     Cube* skyBox = new Cube();
     skyBox->SetType(3);
     skyBox->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
-skyBox->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-skyBox->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
-skyBox->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
-skyBox->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
-skyBox->SetScale(glm::vec3(100.0f, 100.0f, 100.0f));
-cubeList.push_back(skyBox);
+    skyBox->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+    skyBox->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+    skyBox->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+    skyBox->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+    skyBox->SetScale(glm::vec3(100.0f, 100.0f, 100.0f));
+    cubeList.push_back(skyBox);
 
     if (level == 0) {
 		Cube* cube = new Cube();
@@ -121,22 +121,64 @@ cubeList.push_back(skyBox);
         for (int i = 0; i < 4; i++) {
 
             Cube* cube = new Cube();
-            if (i < 2) {
-                cube->SetType(1);
-                cube->SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
-            }
-            else
-            {
-                cube->SetType(2);
-            }
-            cube->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+            cube->SetType(1);
+            cube->SetPosition(glm::vec3(0.0f + i, 0.0f, 0.0f));
             cube->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
             cube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
             cube->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
             cubeList.push_back(cube);
         }
 
+        for (int i = 0; i < 4; i++) {
+            Cube* cube = new Cube();
+            cube->SetType(5);
+            cube->SetPosition(glm::vec3(0.0f + i, 2.0f, 0.0f));
+            cube->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+            cube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+            cube->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+            cubeList.push_back(cube);
+        }
+
+        Cube* cube = new Cube();
+        cube->SetType(4);
+        cube->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+        cube->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+        cube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+        cube->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+        cubeList.push_back(cube);
+
     }
+
+
+    for (int i = 0; i < cubeList.size(); i++) {
+        //stone
+        if (cubeList[i]->GetType() == 1) {
+			cubeList[i]->SetColor(glm::vec3(0.502f, 0.502f, 0.502f));
+			cubeList[i]->SetMass(50.0f);
+			cubeList[i]->SetRestitution(0.3f);
+		}
+        //bird
+        else if (cubeList[i]->GetType() == 2) {
+
+            cubeList[i]->SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
+			cubeList[i]->SetMass(10.0f);
+			cubeList[i]->SetRestitution(0.8f);
+        }
+        //pig
+        else if (cubeList[i]->GetType() == 4) {
+			cubeList[i]->SetColor(glm::vec3(1.0f, 1.0f, 0.0f));
+            cubeList[i]->SetMass(10.0f);
+            cubeList[i]->SetRestitution(0.8f);
+            score++;
+        }
+        //wood
+        else if (cubeList[i]->GetType() == 5) {
+			cubeList[i]->SetColor(glm::vec3(0.8f, 0.4f, 0.0f));
+			cubeList[i]->SetMass(20.0f);
+			cubeList[i]->SetRestitution(0.8f);
+		}
+
+	}
 
     return cubeList;
 }

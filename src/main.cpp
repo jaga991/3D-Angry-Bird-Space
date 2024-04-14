@@ -59,6 +59,11 @@ std::vector<Cube*> cubeList;
 //frame rate
 const float desiredFrameTime = 1.0f / 200.0; // 60 FPS
 
+//game variables
+int shotFired = 0;
+int score = 0;
+
+
 struct pair_comparator {
     bool operator() (const std::pair<Cube*, Cube*>& a, const std::pair<Cube*, Cube*>& b) const {
         // Order the pairs so that the smaller pointer is always first
@@ -109,10 +114,10 @@ int main()
     }
     glEnable(GL_DEPTH_TEST);
 
-    cubeList = loadLevel(0);
+    cubeList = loadLevel(3, score);
 
 
-
+    std::cout << "score is: " << score << std::endl;
     // build and compile our shader zprogram
     // ------------------------------------
     Shader ourShader("Linking\\shader\\shader.vs", "Linking\\shader\\shader.fs");
@@ -303,9 +308,20 @@ int main()
             // Update the position and rotation of the cube
             cubeList[i]->SetPosition(cubeList[i]->GetPosition() + cubeList[i]->GetVelocity() * deltaTime);
             cubeList[i]->SetRotation(cubeList[i]->GetRotation() + cubeList[i]->GetAngularVelocity() * deltaTime);
+
+            //check if pig destroyed
+            if (cubeList[i]->GetType() == 4) {
+                if (glm::length(cubeList[i]->GetVelocity()) > 0.2f) {
+					//delete cube
+                   cubeList.erase(cubeList.begin() + i);
+                   score--;
+                   std::cout << "score is: " << score << std::endl;
+				}
+            }
+            
             ourShader.setInt("cubeType", cubeList[i]->GetType());
             cubeList[i]->Draw(ourShader);
-            // Draw the cube
+            
 
         }
 
@@ -455,6 +471,9 @@ void processInput(GLFWwindow* window)
         newCube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
         newCube->SetAngularVelocity(glm::vec3(60.0f, 61.0f, 0.0f)); // Change this to the angular velocity you want
         cubeList.push_back(newCube);
+
+        //increase shot fired count
+        shotFired++;
     }
 
     wasRightMouseButtonPressed = isRightMouseButtonPressed;
