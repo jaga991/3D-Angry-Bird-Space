@@ -148,6 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="collision\sat.h" />
+    <ClInclude Include="stuff.txt" />
     <ClInclude Include="level\level.h" />
     <ClInclude Include="src\camera.h" />
     <ClInclude Include="src\Cube.h" />

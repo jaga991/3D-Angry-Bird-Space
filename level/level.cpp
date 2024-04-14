@@ -4,6 +4,50 @@
 std::vector<Cube*> loadLevel(int level) {
     std::vector<Cube*> cubeList;
 
+    Cube* skyBox = new Cube();
+    skyBox->SetType(3);
+    skyBox->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+skyBox->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+skyBox->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+skyBox->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+skyBox->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+skyBox->SetScale(glm::vec3(100.0f, 100.0f, 100.0f));
+cubeList.push_back(skyBox);
+
+    if (level == 0) {
+		Cube* cube = new Cube();
+        cube->SetType(1);
+		cube->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+		cube->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+		cube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+		cube->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+		cubeList.push_back(cube);
+
+		Cube* cube2 = new Cube();
+        cube2->SetType(2);
+		cube2->SetPosition(glm::vec3(1.0f, 1.0f, 0.0f));
+		cube2->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+		cube2->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+		cube2->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+		cubeList.push_back(cube2);
+
+		Cube* cube3 = new Cube();
+        cube3->SetType(3);
+		cube3->SetPosition(glm::vec3(2.0f, 2.0f, 0.0f));
+		cube3->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+		cube3->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+		cube3->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+		cubeList.push_back(cube3);
+
+		Cube* cube4 = new Cube();
+		cube4->SetType(4);
+		cube4->SetPosition(glm::vec3(0.0f, 3.0f, 0.0f));
+		cube4->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+		cube4->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+        cube4->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+        cubeList.push_back(cube4);
+    }
+
     if (level == 1) {
         for (int i = 0; i < 2; i++) {
             float x = 0.0f + 1.0f * i;
@@ -47,23 +91,43 @@ std::vector<Cube*> loadLevel(int level) {
         // Initialize random seed
         srand(static_cast<unsigned>(time(0)));
 
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 30; i++) {
             // Generate random position
-            float x = static_cast<float>(rand() % 20); // Random float between -50 and 50
-            float y = static_cast<float>(rand() % 20);
-            float z = static_cast<float>(rand() % 20);
+            float x = static_cast<float>(rand() % 15); 
+            float y = static_cast<float>(rand() % 15);
+            float z = static_cast<float>(rand() % 15);
 
-            // Generate random scale
-            float scale = static_cast<float>(rand() % 2 + 1); // Random float between 1 and 10
 
             Cube* cube = new Cube();
             cube->SetPosition(glm::vec3(x, y, z));
-            cube->SetScale(glm::vec3(scale, scale, scale));
+            cube->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+            cube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+            cube->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+
+
+            cubeList.push_back(cube);
+        }
+    }
+
+    else if (level == 3) {
+        for (int i = 0; i < 4; i++) {
+
+            Cube* cube = new Cube();
+            if (i < 2) {
+                cube->SetType(1);
+                cube->SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
+            }
+            else
+            {
+                cube->SetType(2);
+            }
+            cube->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
             cube->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
             cube->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
             cube->SetAngularVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
             cubeList.push_back(cube);
         }
+
     }
 
     return cubeList;

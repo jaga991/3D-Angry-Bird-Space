@@ -53,5 +53,8 @@
     <ClInclude Include="level\level.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="stuff.txt">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

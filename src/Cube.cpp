@@ -3,7 +3,7 @@
 #include <vector>
 
 
-Cube::Cube() : position(0.0f, 0.0f, 0.0f), velocity(0.0f, 0.0f, 0.0f), color(0.0f, 1.0f, 0.0f), mass(20.0f), angularVelocity(0.0f,0.0f,0.0f), scale(1.0f,1.0f,1.0f), restitution(0.5f){
+Cube::Cube() : position(0.0f, 0.0f, 0.0f), velocity(0.0f, 0.0f, 0.0f), color(0.0f, 1.0f, 0.0f), mass(20.0f), angularVelocity(0.0f,0.0f,0.0f), scale(1.0f,1.0f,1.0f), restitution(0.5f), type(0), rotation(0.0f,0.0f,0.0f){
     float vertices[] = {
            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
             0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -47,6 +47,7 @@ Cube::Cube() : position(0.0f, 0.0f, 0.0f), velocity(0.0f, 0.0f, 0.0f), color(0.0
            -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
+
 
     inertia = glm::mat3x3(0.3f);
 
@@ -200,6 +201,9 @@ glm::vec3 Cube::GetScale() const {
     return scale;
 }
 
+void Cube::SetType(int typeIn) {
+	type = typeIn;
+}
 
 glm::vec3 Cube::GetPosition() const {
     return position;
@@ -227,6 +231,10 @@ float Cube::GetMass()
 glm::mat3x3 Cube::GetInertia()
 {
     return inertia;
+}
+
+int Cube::GetType() {
+	return type;
 }
 
 float Cube::GetRestitution() {
