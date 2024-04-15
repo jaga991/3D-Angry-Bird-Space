@@ -4,14 +4,30 @@ out vec4 FragColor;
 in vec3 ourColor;
 in vec2 TexCoord;
 
-// texture sampler
+// texture samplers
 uniform sampler2D texture1;
 uniform sampler2D texture2;
+uniform sampler2D texture3;
+uniform sampler2D texture4;
+uniform sampler2D texture5;
+
+// cube type
+uniform int cubeType;
 
 uniform vec3 color;
 void main()
 {
-    vec4 texColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.2);
-    FragColor = vec4(color, 1.0) * texColor;
-
+    vec4 texColor;
+    if (cubeType == 1) {
+        texColor = texture(texture1, TexCoord);
+    } else if (cubeType == 2) {
+        texColor = texture(texture2, TexCoord);
+    } else if (cubeType == 3) {
+        texColor = texture(texture3, TexCoord);
+    } else if (cubeType == 4) {
+        texColor = texture(texture4, TexCoord);
+    } else if (cubeType == 5) {
+		texColor = texture(texture5, TexCoord);
+	}
+    FragColor = vec4(color, 0.5) * texColor;
 }

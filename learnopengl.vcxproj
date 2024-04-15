@@ -117,7 +117,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>irrKlang.lib;freetype.lib;glfw3.lib;opengl32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>MSVCRT</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
@@ -138,14 +138,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="collision\resolve.cpp" />
     <ClCompile Include="collision\sat.cpp" />
-    <ClCompile Include="Linking\shape\cube.cpp" />
+    <ClCompile Include="level\level.cpp" />
     <ClCompile Include="physics\check_collision.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Cube.cpp" />
+    <ClCompile Include="src\octree.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="collision\sat.h" />
+    <ClInclude Include="stuff.txt" />
+    <ClInclude Include="level\level.h" />
     <ClInclude Include="src\camera.h" />
     <ClInclude Include="src\Cube.h" />
     <ClInclude Include="src\shader_s.h" />
