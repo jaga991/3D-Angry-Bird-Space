@@ -25,10 +25,8 @@
 #include <set>
 #include <tuple>
 
-#include <ft2build.h>
 #include <map>
-#include FT_FREETYPE_H  
-
+#include <string>
 using namespace irrklang;
 
 ISoundEngine* SoundEngine = createIrrKlangDevice();
@@ -37,28 +35,19 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void RenderText(Shader& shader, std::string text, float x, float y, float scale, glm::vec3 color);
+
+void setShaderAndTexture();
 
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 10.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 bool wasRightMouseButtonPressed = false;
 
-/// Holds all state information relevant to a character as loaded using FreeType
-struct Character {
-    unsigned int TextureID; // ID handle of the glyph texture
-    glm::ivec2   Size;      // Size of glyph
-    glm::ivec2   Bearing;   // Offset from baseline to left/top of glyph
-    unsigned int Advance;   // Horizontal offset to advance to next glyph
-};
-
-std::map<GLchar, Character> Characters;
-unsigned int VAO, VBO;
 
 bool rerenderText = true;
 
@@ -135,104 +124,19 @@ int main()
     }
     glEnable(GL_DEPTH_TEST);
 
-    //Initialize the text rendering library
-    FT_Library ft;
-    // All functions return a value different than 0 whenever an error occurred
-    if (FT_Init_FreeType(&ft))
-    {
-        std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
-        return -1;
-    }
-
-    // find path to font
-    std::string font_name = "Linking\\font\\arial.ttf";
-    if (font_name.empty())
-    {
-        std::cout << "ERROR::FREETYPE: Failed to load font_name" << std::endl;
-        return -1;
-    }
-
-    // load font as face
-    FT_Face face;
-    if (FT_New_Face(ft, font_name.c_str(), 0, &face)) {
-        std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
-        return -1;
-    }
-    else {
-        // set size to load glyphs as
-        FT_Set_Pixel_Sizes(face, 0, 48);
-
-        // disable byte-alignment restriction
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-        // load first 128 characters of ASCII set
-        for (unsigned char c = 0; c < 128; c++)
-        {
-            // Load character glyph 
-            if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-            {
-                std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
-                continue;
-            }
-            // generate texture
-            unsigned int texture;
-            glGenTextures(1, &texture);
-            glBindTexture(GL_TEXTURE_2D, texture);
-            glTexImage2D(
-                GL_TEXTURE_2D,
-                0,
-                GL_RED,
-                face->glyph->bitmap.width,
-                face->glyph->bitmap.rows,
-                0,
-                GL_RED,
-                GL_UNSIGNED_BYTE,
-                face->glyph->bitmap.buffer
-            );
-            // set texture options
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            // now store character for later use
-            Character character = {
-                texture,
-                glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-                glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-                static_cast<unsigned int>(face->glyph->advance.x)
-            };
-            Characters.insert(std::pair<char, Character>(c, character));
-        }
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
-    // destroy FreeType once we're finished
-    FT_Done_Face(face);
-    FT_Done_FreeType(ft);
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-    Shader shader("Linking\\shader\\text.vs", "Linking\\shader\\text.fs");
-    glm::mat4 proj = glm::ortho(0.0f, static_cast<float>(SCR_WIDTH), 0.0f, static_cast<float>(SCR_HEIGHT));
-    shader.use();
-    glUniformMatrix4fv(glGetUniformLocation(shader.ID, "proj"), 1, GL_FALSE, glm::value_ptr(proj));
-
     SoundEngine->play2D("audio/bgm.mp3", true);
 
 
     cubeList = loadLevel(3, score);
+
+    std::set<std::pair<Cube*, Cube*>, pair_comparator> collidingCubes;
 
 
     std::cout << "score is: " << score << std::endl;
     // build and compile our shader zprogram
     // ------------------------------------
     Shader ourShader("Linking\\shader\\shader.vs", "Linking\\shader\\shader.fs");
+    ourShader.use();
 
     // load and create textures
     // -------------------------
@@ -356,13 +260,22 @@ int main()
     stbi_image_free(data);
     // load image, create texture and generate mipmaps
 
-    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-    // -------------------------------------------------------------------------------------------
-    ourShader.use(); // don't forget to activate/use the shader before setting uniforms!
-    // either set it manually like so:
-    glUniform1i(glGetUniformLocation(ourShader.ID, "texture1"), 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture1);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture2);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, texture3);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, texture4);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, texture5);
+    ourShader.setInt("texture1", 0);
+    ourShader.setInt("texture2", 1);
+    ourShader.setInt("texture3", 2);
+    ourShader.setInt("texture4", 3);
+    ourShader.setInt("texture5", 4);
 
-    std::set<std::pair<Cube*, Cube*>, pair_comparator> collidingCubes;
     // -----------
 
     while (!glfwWindowShouldClose(window))
@@ -382,23 +295,10 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // bind textures on corresponding texture units
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, texture2);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, texture3);
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, texture4);
-        glActiveTexture(GL_TEXTURE4);
-        glBindTexture(GL_TEXTURE_2D, texture5);
-        ourShader.setInt("texture1", 0);
-        ourShader.setInt("texture2", 1);
-        ourShader.setInt("texture3", 2);
-        ourShader.setInt("texture4", 3);
-        ourShader.setInt("texture5", 4);
-        // activate shader
-        ourShader.use();
+                // activate shader
+
+
+
         // pass projection matrix to shader (note that in this case it could change every frame)
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         ourShader.setMat4("projection", projection);
@@ -415,6 +315,18 @@ int main()
 
         for (int i = 0; i < cubeList.size(); i++)
         {
+
+            ourShader.setInt("cubeType", cubeList[i]->GetType());
+            cubeList[i]->Draw(ourShader);
+            if (isnan(cubeList[i]->GetPosition().x) || isnan(cubeList[i]->GetPosition().y) || isnan(cubeList[i]->GetPosition().z)) {
+                cubeList[i]->SetPosition(cubeList[i]->GetPrevPos());
+            }
+
+            if (glm::length(cubeList[i]->GetPosition()) > 10000) {
+                cubeList[i]->SetPosition(cubeList[i]->GetPrevPos());
+
+            }
+
             //apply air resistance
             cubeList[i]->SetVelocity(cubeList[i]->GetVelocity() * (1.0f - airResistance * deltaTime));
             cubeList[i]->SetAngularVelocity(cubeList[i]->GetAngularVelocity() * (1.0f - airResistance * deltaTime));
@@ -422,24 +334,20 @@ int main()
             // Update the position and rotation of the cube
             cubeList[i]->SetPosition(cubeList[i]->GetPosition() + cubeList[i]->GetVelocity() * deltaTime);
             cubeList[i]->SetRotation(cubeList[i]->GetRotation() + cubeList[i]->GetAngularVelocity() * deltaTime);
-
+            
             //check if pig destroyed
             if (cubeList[i]->GetType() == 4) {
                 if (glm::length(cubeList[i]->GetVelocity()) > 0.2f) {
-					//delete cube
                     SoundEngine->play2D("audio/pigDeath.mp3", false);
-                   cubeList.erase(cubeList.begin() + i);
+                   cubeList[i]->SetPosition(glm::vec3(200.0f, 200.0f, 200.0f));
+                   cubeList[i]->SetVelocity(glm::vec3(0, 0, 0));
                    score--;
                    std::cout << "score is: " << score << std::endl;
                        if (score == 0) {
-                           SoundEngine->play2D("audio/levelComplete.mp3", false);
+                       SoundEngine->play2D("audio/levelComplete.mp3", false);
 				   }
 				}
             }
-            
-            ourShader.setInt("cubeType", cubeList[i]->GetType());
-            cubeList[i]->Draw(ourShader);
-            
 
         }
         
@@ -449,21 +357,19 @@ int main()
 
         //check each pair of cube for collision
         for (int i = 0; i < cubeList.size(); i++) {
-
+            if (cubeList[i]->GetType() == 3)
+            {
+                continue;
+            }
             for (int j = i + 1; j < cubeList.size(); j++)
             {
-                //if distance of cube center is more than 3, skip the collision check
-                if (glm::distance(cubeList[i]->GetPosition(), cubeList[j]->GetPosition()) > 3.0f) {
+                if (cubeList[j]->GetType() == 3)
+                {
                     continue;
                 }
                 result = areCubesColliding(*cubeList[i], *cubeList[j]);
                 if (result.first)
                 {
-                    collidingCubes.insert(std::make_pair(cubeList[i], cubeList[j]));
-                }
-                for (const auto& pair : collidingCubes) {
-                    Cube* cube1 = pair.first;
-                    Cube* cube2 = pair.second;
                     //get minimum translation vector and magnitude
                     glm::vec3 mtv = result.second.first;
                     float mtvMagnitude = result.second.second;
@@ -486,16 +392,17 @@ int main()
                     cubeList[i]->SetPosition(cubeList[i]->GetPosition() + mtv * (mtvMagnitude * (cubeList[j]->GetMass() / totalMass)));
                     cubeList[j]->SetPosition(cubeList[j]->GetPosition() - mtv * (mtvMagnitude * (cubeList[i]->GetMass() / totalMass)));
 
-                    //// Impulse resolution
+                    // Impulse resolution
                     glm::vec3 relativeVelocity = cubeList[i]->GetVelocity() - cubeList[j]->GetVelocity();
                     float impulseMagnitude = -(1 + ((cubeList[i]->GetRestitution() + cubeList[j]->GetRestitution()) / 2)) * glm::dot(relativeVelocity, mtv) / (1 / cubeList[i]->GetMass() + 1 / cubeList[j]->GetMass());
                     glm::vec3 impulse = impulseMagnitude * mtv * 0.95f;
 
-
+                    cubeList[i]->SetPrevPos(cubeList[i]->GetPosition());
+                    cubeList[j]->SetPrevPos(cubeList[j]->GetPosition());
                     cubeList[i]->SetVelocity(cubeList[i]->GetVelocity() + impulse / cubeList[i]->GetMass());
                     cubeList[j]->SetVelocity(cubeList[j]->GetVelocity() - impulse / cubeList[j]->GetMass());
 
-                    // Torque and angular velocity adjustment
+                    /* Torque and angular velocity adjustment*/
 
                     glm::vec3 r1 = contactPoint - cubeList[i]->GetPosition();
                     glm::vec3 r2 = contactPoint - cubeList[j]->GetPosition();
@@ -509,8 +416,9 @@ int main()
 
                 }
             }
+                   
         }
-        collidingCubes.clear();
+
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
@@ -524,7 +432,8 @@ int main()
     // 
     // ------------------------------------------------------------------
     for (int i = 0; i < cubeList.size(); i++)
-    {
+    {   
+        cubeList[i]->deleteBuffers();
         delete cubeList[i];
     }
     cubeList.clear();
@@ -639,6 +548,10 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 }
 
+void setShaderAndTexture()
+{
+}
+
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -646,49 +559,4 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     // make sure the viewport matches the new window dimensions; note that width and 
     // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
-}
-
-void RenderText(Shader& shader, std::string text, float x, float y, float scale, glm::vec3 color)
-{
-    // activate corresponding render state	
-    shader.use();
-    glUniform3f(glGetUniformLocation(shader.ID, "textColor"), color.x, color.y, color.z);
-    glActiveTexture(GL_TEXTURE0);
-    glBindVertexArray(VAO);
-
-    // iterate through all characters
-    std::string::const_iterator c;
-    for (c = text.begin(); c != text.end(); c++)
-    {
-        Character ch = Characters[*c];
-
-        float xpos = x + ch.Bearing.x * scale;
-        float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
-
-        float w = ch.Size.x * scale;
-        float h = ch.Size.y * scale;
-        // update VBO for each character
-        float vertices[6][4] = {
-            { xpos,     ypos + h,   0.0f, 0.0f },
-            { xpos,     ypos,       0.0f, 1.0f },
-            { xpos + w, ypos,       1.0f, 1.0f },
-
-            { xpos,     ypos + h,   0.0f, 0.0f },
-            { xpos + w, ypos,       1.0f, 1.0f },
-            { xpos + w, ypos + h,   1.0f, 0.0f }
-        };
-        // render glyph texture over quad
-        glBindTexture(GL_TEXTURE_2D, ch.TextureID);
-        // update content of VBO memory
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); // be sure to use glBufferSubData and not glBufferData
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        // render quad
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-        x += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
-    }
-    glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
 }

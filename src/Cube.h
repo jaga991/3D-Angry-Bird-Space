@@ -7,8 +7,6 @@
 
 class Cube {
 
-
-
 public:
 
     Cube();
@@ -25,11 +23,13 @@ public:
     
     void SetRestitution(float restitutionIn);
     void SetType(int typeIn);
+    void SetPrevPos(glm::vec3 prevPosIn);
 
     
     int GetType();
     float GetRestitution();
     float GetMass();
+    glm::vec3 GetPrevPos();
     glm::vec3 GetRotation();
     glm::mat3x3 GetInertia();
     glm::vec3 GetPosition() const;
@@ -48,10 +48,12 @@ private:
     glm::vec3 velocity;
     glm::vec3 rotation;
     glm::vec3 color;
-    glm::mat3x3 inertia;
+
     glm::vec3 center;
     glm::vec3 angularVelocity;
     glm::vec3 scale;
+    glm::vec3 prevPos;
+    glm::mat3x3 inertia;
     float mass;
     float restitution;
     int type;

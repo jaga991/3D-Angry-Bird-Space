@@ -212,6 +212,10 @@ void Cube::SetType(int typeIn) {
 	type = typeIn;
 }
 
+void Cube::SetPrevPos(glm::vec3 prevPosIn) {
+	prevPos = prevPosIn;
+}
+
 glm::vec3 Cube::GetPosition() const {
     return position;
 }
@@ -233,6 +237,11 @@ glm::vec3 Cube::GetRotation()
 float Cube::GetMass()
 {
 		return mass;
+}
+
+glm::vec3 Cube::GetPrevPos()
+{
+	return prevPos;
 }
 
 glm::mat3x3 Cube::GetInertia()
