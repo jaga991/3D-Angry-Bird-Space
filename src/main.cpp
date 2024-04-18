@@ -490,8 +490,7 @@ void processInput(GLFWwindow *window) {
   static const std::vector<glm::vec3> bird_colors = {
       glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.8f, 0.8f, 0.0f),
       glm::vec3(0.4f, 0.6f, 0.8f), glm::vec3(0.6f, 0.6f, 0.6f)};
-  static const float blue_side = 0.8;
-  static const float blue_velocity_proportion = 0.8;
+  static const float blue_side = 0.6;
 
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
@@ -550,7 +549,7 @@ void processInput(GLFWwindow *window) {
           newCube->SetAngularVelocity(last_bird_ptr->GetAngularVelocity());
           newCube->SetVelocity(last_bird_ptr->GetVelocity() +
                                (position - last_bird_ptr->GetPosition()) *
-                                   glm::vec3{blue_velocity_proportion});
+                                   glm::vec3{2.5});
           cubeList.push_back(newCube);
         };
 
