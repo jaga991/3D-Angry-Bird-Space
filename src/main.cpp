@@ -42,8 +42,8 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void setShaderAndTexture();
 
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1024;
+const unsigned int SCR_HEIGHT = 576;
 
 Camera camera(glm::vec3(0.0f, 0.0f, 10.0f));
 float lastX = SCR_WIDTH / 2.0f;
