@@ -125,7 +125,7 @@ int main() {
   }
   glEnable(GL_DEPTH_TEST);
 
-  SoundEngine->play2D("audio/bgm.mp3", true);
+  // SoundEngine->play2D("audio/bgm.mp3", true);
 
   cubeList = loadLevel(3, score);
 
@@ -490,6 +490,10 @@ void processInput(GLFWwindow *window) {
   static const std::vector<glm::vec3> bird_colors = {
       glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.8f, 0.8f, 0.0f),
       glm::vec3(0.4f, 0.6f, 0.8f), glm::vec3(0.6f, 0.6f, 0.6f)};
+  static const std::vector<std::string> bird_sounds = {
+      "audio/red_bird.mp3",   "audio/yellow_bird.mp3", "audio/blue_bird.mp3",
+      "audio/black_bird.mp3", "audio/yellow_abil.mp3", "audio/blue_abil.mp3",
+      "audio/black_abil.mp3"};
   static const float blue_side = 0.6;
 
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -517,6 +521,7 @@ void processInput(GLFWwindow *window) {
       }
 
       auto bird_index = last_bird_ptr->GetType() - BASE_BIRD_NUM;
+      SoundEngine->play2D(bird_sounds[3 + bird_index].data(), false);
 
       if (bird_index == 1) {
         // Yellow bird
@@ -595,7 +600,7 @@ void processInput(GLFWwindow *window) {
       newCube->SetAngularVelocity(glm::vec3(
           60.0f, 61.0f, 0.0f)); // Change this to the angular velocity you want
       cubeList.push_back(newCube);
-      SoundEngine->play2D("audio/fire.mp3", false);
+      SoundEngine->play2D(bird_sounds[next_bird_index].data(), false);
       // increase shot fired count
       shotFired++;
 
