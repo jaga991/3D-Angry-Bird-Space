@@ -496,17 +496,39 @@ void processInput(GLFWwindow *window) {
       "audio/black_abil.mp3"};
   static const float blue_side = 0.6;
 
+  static bool was_q_pressed = false;
+  static bool is_scout_mode = false;
+
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
 
-  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    camera.ProcessKeyboard(FORWARD, deltaTime);
-  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    camera.ProcessKeyboard(BACKWARD, deltaTime);
-  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    camera.ProcessKeyboard(LEFT, deltaTime);
-  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-    camera.ProcessKeyboard(RIGHT, deltaTime);
+  if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS && !was_q_pressed) {
+    is_scout_mode = !is_scout_mode;
+    if (is_scout_mode) {
+      cubeList.front()->SetColor(glm::vec3{1, 0, 1});
+    } else {
+      cubeList.front()->SetColor(glm::vec3{1});
+      camera.Position = glm::vec3{0, 0, 10};
+    }
+    was_q_pressed = true;
+  } else if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_RELEASE && was_q_pressed) {
+    was_q_pressed = false;
+  }
+
+  if (is_scout_mode) {
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+      camera.ProcessKeyboard(FORWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+      camera.ProcessKeyboard(BACKWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+      camera.ProcessKeyboard(LEFT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+      camera.ProcessKeyboard(RIGHT, deltaTime);
+  }
+
+  if (is_scout_mode) {
+    return;
+  }
 
   bool isRightMouseButtonPressed =
       glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
