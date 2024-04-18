@@ -125,7 +125,7 @@ int main() {
   }
   glEnable(GL_DEPTH_TEST);
 
-  // SoundEngine->play2D("audio/bgm.mp3", true);
+  SoundEngine->play2D("audio/bgm.mp3", true);
 
   cubeList = loadLevel(3, score);
 

@@ -1,35 +1,28 @@
-
-// Calculate the vectors from the centers of mass to the point of contact
-glm::vec3 r1 = contactPoint - cubeList[i]->GetPosition();
-glm::vec3 r2 = contactPoint - cubeList[j]->GetPosition();
-
-// Calculate the relative velocities at the point of contact
-glm::vec3 relativeVelocity1 = cubeList[i]->GetVelocity() + glm::cross(cubeList[i]->GetAngularVelocity(), r1);
-glm::vec3 relativeVelocity2 = cubeList[j]->GetVelocity() + glm::cross(cubeList[j]->GetAngularVelocity(), r2);
-glm::vec3 relativeVelocity = relativeVelocity1 - relativeVelocity2;
-
-// Calculate the moments of inertia
-float I1 = cubeList[i]->GetMass() * glm::length(cubeList[i]->GetScale()) * glm::length(cubeList[i]->GetScale()) / 6.0f;
-float I2 = cubeList[j]->GetMass() * glm::length(cubeList[j]->GetScale()) * glm::length(cubeList[j]->GetScale()) / 6.0f;
-
-// Calculate the impulse
-float impulseMagnitude = -(1 + ((cubeList[i]->GetRestitution() + cubeList[j]->GetRestitution())/2)) * glm::dot(relativeVelocity, mtv) / (1 / cubeList[i]->GetMass() + 1 / cubeList[j]->GetMass() + glm::dot(glm::cross(r1, mtv), glm::cross(r1, mtv)) / I1 + glm::dot(glm::cross(r2, mtv), glm::cross(r2, mtv)) / I2);
-glm::vec3 impulse = impulseMagnitude * mtv;
-
-// Apply the impulse to the linear velocities
-cubeList[i]->SetVelocity(cubeList[i]->GetVelocity() + impulse / cubeList[i]->GetMass());
-cubeList[j]->SetVelocity(cubeList[j]->GetVelocity() - impulse / cubeList[j]->GetMass());
-
-// Apply the impulse to the angular velocities
-glm::vec3 angularImpulse1 = glm::cross(r1, impulse) / I1;
-glm::vec3 angularImpulse2 = glm::cross(r2, -impulse) / I2;
-cubeList[i]->SetAngularVelocity(cubeList[i]->GetAngularVelocity() + angularImpulse1);
-cubeList[j]->SetAngularVelocity(cubeList[j]->GetAngularVelocity() + angularImpulse2);
+========== Quick Controls ==========
+WASD: Move camera position
+Left click + Drag: Move camera view
+Right click: Fire bird / Use ability
+Q: Toggle scouting mode
 
 
-type 0 default
-type 1 pig
-type 2 bird
-type 3 wood
-type 4 ice
-type 5 stone
+========== Detailed Controls ==========
+There are two modes: Scout mode and Attack mode. You start in attack mode. Press Q to toggle between the modes. 
+
+- Attack Mode: You can rotate your camera and shoot birds anyway you like. However, you can’t move the position of your camera. Utilize this to attack the pigs that stole the eggs! 
+- Scout Mode: You can rotate your camera and move the position. Use WASD to move around. However, you can’t shoot any birds. You’ll know if you’re in scout mode when the background turns purple. Use this opportunity to plan your attack! 
+
+In both modes, you can left click + drag to rotate your camera view. 
+
+
+There are four types of birds: red bird (Red), yellow bird (Chuck), blue birds (Jim, Jack and Jay), and black bird (Bomb). Right click to shoot the bird. Right click again to trigger its ability. Here is the overview of their powers: 
+
+- Red: No powers. He’s a simple bird! 
+- Chuck: Gain a speed boost! Pierce through your enemies! 
+- Jim, Jack and Jay: Splits into three! The more the merrier! 
+- Bomb: Explode! Send objects flying! Wreak havoc! 
+
+========== How to Run ==========
+In the project directory, run SpaceAngryBirds.exe
+
+========== How to Compile ==========
+Open the .sln file in Microsoft Visual Studio. Make sure you're in Debug x64 mode. Press Build > Build Solution
