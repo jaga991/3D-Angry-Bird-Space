@@ -1,3 +1,5 @@
+Please look at Reports for furthur details
+
 ========== Quick Controls ==========
 WASD: Move camera position
 Left click + Drag: Move camera view
